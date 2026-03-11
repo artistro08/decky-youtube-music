@@ -87,6 +87,12 @@ const PluginContent = () => {
             padding-right: 16px !important;
           }
         `,
+        quickAccessControlsClasses?.PanelSectionRow && `
+          .ytm-tabs-container .${quickAccessControlsClasses.PanelSectionRow} {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+        `,
       ].filter(Boolean).join('')}</style>
       <Tabs
         activeTab={activeTab}
