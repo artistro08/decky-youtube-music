@@ -27,7 +27,7 @@ const PluginContent = () => {
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const scrollParent = getScrollParent(containerRef.current.parentElement);
+    const scrollParent = getScrollParent(containerRef.current);
     const parentRect = scrollParent.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
     setStickyTop(Math.round(containerRect.top - parentRect.top));
