@@ -30,19 +30,15 @@ export const SearchView = () => {
   return (
     <>
       <PanelSection title="Search">
-        <div style={{ margin: '0 -16px' }}>
-          <TextField
-            label="Search YouTube Music"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') void handleSearch(); }}
-          />
-        </div>
-        <div style={{ margin: '0 -16px' }}>
-          <ButtonItem layout="below" onClick={() => { void handleSearch(); }} disabled={searching || !query.trim()}>
-            {searching ? 'Searching...' : 'Search'}
-          </ButtonItem>
-        </div>
+        <TextField
+          label="Search YouTube Music"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') void handleSearch(); }}
+        />
+        <ButtonItem layout="below" onClick={() => { void handleSearch(); }} disabled={searching || !query.trim()}>
+          {searching ? 'Searching...' : 'Search'}
+        </ButtonItem>
       </PanelSection>
 
       {searched && results.length === 0 && (

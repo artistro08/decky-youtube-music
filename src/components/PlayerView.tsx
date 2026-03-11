@@ -81,7 +81,7 @@ export const PlayerView = () => {
         </PanelSectionRow>
 
         {duration > 0 && (
-          <div style={{ margin: '0 -16px', padding: '0 8px' }}>
+          <div style={{ padding: '0 8px' }}>
             <SliderField
               label=""
               value={position}
@@ -100,7 +100,7 @@ export const PlayerView = () => {
         {DialogButton ? (
           <>
             <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', marginLeft: '-16px', marginRight: '-16px' }}
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', padding: '0 16px' }}
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
@@ -110,7 +110,7 @@ export const PlayerView = () => {
               <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
             </Focusable>
             <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', marginLeft: '-16px', marginRight: '-16px' }}
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', padding: '0 16px' }}
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
@@ -130,7 +130,7 @@ export const PlayerView = () => {
 
       {/* Volume */}
       <PanelSection title="Volume">
-        <div style={{ margin: '0 -16px', padding: '0 8px' }}>
+        <div style={{ padding: '0 8px' }}>
           <SliderField
             label={muted ? 'Muted' : `${Math.round(volume)}%`}
             value={muted ? 0 : volume}

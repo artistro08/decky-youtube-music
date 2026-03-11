@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow, Tabs, gamepadTabbedPageClasses, staticClasses } from '@decky/ui';
+import { ButtonItem, PanelSection, PanelSectionRow, Tabs, gamepadTabbedPageClasses, quickAccessControlsClasses, staticClasses } from '@decky/ui';
 import { definePlugin } from '@decky/api';
 import { useEffect, useRef, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
@@ -65,8 +65,8 @@ const PluginContent = () => {
       className="ytm-tabs-container"
       style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column' }}
     >
-      {gamepadTabbedPageClasses?.TabHeaderRowWrapper && (
-        <style>{`
+      <style>{[
+        gamepadTabbedPageClasses?.TabHeaderRowWrapper && `
           .ytm-tabs-container .${gamepadTabbedPageClasses.TabHeaderRowWrapper} {
             position: sticky;
             top: ${stickyTop}px;
@@ -74,8 +74,20 @@ const PluginContent = () => {
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
           }
-        `}</style>
-      )}
+        `,
+        quickAccessControlsClasses?.PanelSection && `
+          .ytm-tabs-container .${quickAccessControlsClasses.PanelSection} {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+        `,
+        quickAccessControlsClasses?.PanelSectionTitle && `
+          .ytm-tabs-container .${quickAccessControlsClasses.PanelSectionTitle} {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+        `,
+      ].filter(Boolean).join('')}</style>
       <Tabs
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}
