@@ -1,7 +1,8 @@
-import { ButtonItem, DialogButton, Field, Focusable, PanelSection, PanelSectionRow } from '@decky/ui';
+import { ButtonItem, DialogButton, Field, Focusable } from '@decky/ui';
 import { useEffect, useState } from 'react';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
+import { Section } from './Section';
 
 const getRenderer = (item: QueueItem) =>
   item.playlistPanelVideoRenderer ??
@@ -37,27 +38,27 @@ export const QueueView = () => {
 
   if (loading) {
     return (
-      <PanelSection>
-        <PanelSectionRow><div>Loading queue...</div></PanelSectionRow>
-      </PanelSection>
+      <Section>
+        <div style={{ padding: '16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+          Loading queue...
+        </div>
+      </Section>
     );
   }
 
   if (queue.length === 0) {
     return (
-      <PanelSection title="Queue">
-        <PanelSectionRow>
-          <div style={{ color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>Queue is empty</div>
-        </PanelSectionRow>
-      </PanelSection>
+      <Section title="Queue">
+        <div style={{ padding: '8px 16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+          Queue is empty
+        </div>
+      </Section>
     );
   }
 
   return (
-    <PanelSection title="Queue">
-      <PanelSectionRow>
-        <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
-      </PanelSectionRow>
+    <Section title="Queue">
+      <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
 
       {queue.map((item, index) => {
         const r = getRenderer(item);
@@ -114,19 +115,18 @@ export const QueueView = () => {
 
         // Fallback when DialogButton unavailable
         return (
-          <PanelSectionRow key={index}>
-            <Field
-              label={<span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>{title}</span>}
-              description={artist || undefined}
-              onActivate={() => { void handleJump(index); }}
-              onClick={() => { void handleJump(index); }}
-              highlightOnFocus
-              focusable
-              bottomSeparator="none"
-            />
-          </PanelSectionRow>
+          <Field
+            key={index}
+            label={<span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>{title}</span>}
+            description={artist || undefined}
+            onActivate={() => { void handleJump(index); }}
+            onClick={() => { void handleJump(index); }}
+            highlightOnFocus
+            focusable
+            bottomSeparator="none"
+          />
         );
       })}
-    </PanelSection>
+    </Section>
   );
 };
