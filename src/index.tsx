@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow, Tabs, gamepadTabbedPageClasses, quickAccessControlsClasses, staticClasses } from '@decky/ui';
+import { ButtonItem, Tabs, gamepadTabbedPageClasses, staticClasses } from '@decky/ui';
 import { definePlugin } from '@decky/api';
 import { useEffect, useRef, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
@@ -9,6 +9,7 @@ import { AuthTokenView } from './components/AuthTokenView';
 import { PlayerView } from './components/PlayerView';
 import { QueueView } from './components/QueueView';
 import { SearchView } from './components/SearchView';
+import { Section } from './components/Section';
 
 const getScrollParent = (el: HTMLElement | null): HTMLElement => {
   if (!el || el === document.body) return document.body;
@@ -41,20 +42,18 @@ const PluginContent = () => {
   if (!Tabs) {
     return (
       <>
-        <PanelSection>
+        <Section>
           {(['player', 'queue', 'search'] as const).map((id) => (
-            <PanelSectionRow key={id}>
-              <ButtonItem onClick={() => setActiveTab(id)}>
-                {activeTab === id
-                  ? `▶ ${id.charAt(0).toUpperCase() + id.slice(1)}`
-                  : id.charAt(0).toUpperCase() + id.slice(1)}
-              </ButtonItem>
-            </PanelSectionRow>
+            <ButtonItem key={id} onClick={() => setActiveTab(id)}>
+              {activeTab === id
+                ? `▶ ${id.charAt(0).toUpperCase() + id.slice(1)}`
+                : id.charAt(0).toUpperCase() + id.slice(1)}
+            </ButtonItem>
           ))}
-        </PanelSection>
-        {activeTab === 'player' && <div style={TAB_PAD}><PlayerView /></div>}
-        {activeTab === 'queue' && <div style={TAB_PAD}><QueueView /></div>}
-        {activeTab === 'search' && <div style={TAB_PAD}><SearchView /></div>}
+        </Section>
+        {activeTab === 'player' && <PlayerView />}
+        {activeTab === 'queue' && <QueueView />}
+        {activeTab === 'search' && <SearchView />}
       </>
     );
   }
@@ -65,8 +64,8 @@ const PluginContent = () => {
       className="ytm-tabs-container"
       style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column' }}
     >
-      <style>{[
-        gamepadTabbedPageClasses?.TabHeaderRowWrapper && `
+      {gamepadTabbedPageClasses?.TabHeaderRowWrapper && (
+        <style>{`
           .ytm-tabs-container .${gamepadTabbedPageClasses.TabHeaderRowWrapper} {
             position: sticky;
             top: ${stickyTop}px;
@@ -74,26 +73,8 @@ const PluginContent = () => {
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
           }
-        `,
-        quickAccessControlsClasses?.PanelSection && `
-          .ytm-tabs-container .${quickAccessControlsClasses.PanelSection} {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-          }
-        `,
-        quickAccessControlsClasses?.PanelSectionTitle && `
-          .ytm-tabs-container .${quickAccessControlsClasses.PanelSectionTitle} {
-            padding-left: 16px !important;
-            padding-right: 16px !important;
-          }
-        `,
-        quickAccessControlsClasses?.PanelSectionRow && `
-          .ytm-tabs-container .${quickAccessControlsClasses.PanelSectionRow} {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-          }
-        `,
-      ].filter(Boolean).join('')}</style>
+        `}</style>
+      )}
       <Tabs
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}
