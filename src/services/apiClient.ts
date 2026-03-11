@@ -1,5 +1,6 @@
 import { toaster } from '@decky/api';
 import type { QueueResponse, SearchResultItem, SongInfo } from '../types';
+import { notifyAuthRequired } from './authEvents';
 
 const BASE_URL = 'http://localhost:26538/api/v1';
 const TOKEN_KEY = 'ytmusic_api_token';
@@ -23,7 +24,10 @@ const post = async (path: string, body?: object): Promise<boolean> => {
       headers: headers(),
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (res.status === 401) return false;
+    if (res.status === 401) {
+      notifyAuthRequired();
+      return false;
+    }
     return true;
   } catch {
     return true; // network error, not auth error
@@ -33,7 +37,10 @@ const post = async (path: string, body?: object): Promise<boolean> => {
 const get = async <T>(path: string): Promise<T | null> => {
   try {
     const res = await fetch(`${BASE_URL}${path}`, { headers: headers() });
-    if (res.status === 401) return null;
+    if (res.status === 401) {
+      notifyAuthRequired();
+      return null;
+    }
     if (res.status === 204) return null;
     return res.json() as Promise<T>;
   } catch {
@@ -96,7 +103,11 @@ export const search = async (query: string): Promise<SearchResultItem[]> => {
       body: JSON.stringify({ query }),
     });
     if (!res.ok) {
-      if (res.status !== 401) toaster.toast({ title: 'Search failed', body: `Status ${res.status}` });
+      if (res.status === 401) {
+        notifyAuthRequired();
+      } else {
+        toaster.toast({ title: 'Search failed', body: `Status ${res.status}` });
+      }
       return [];
     }
     const data = await res.json() as { results?: SearchResultItem[] } | SearchResultItem[];

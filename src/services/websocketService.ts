@@ -16,6 +16,8 @@ export const addStateListener = (fn: StateListener): (() => void) => {
   return () => { listeners = listeners.filter((l) => l !== fn); };
 };
 
+export { addAuthListener } from './authEvents';
+
 const notify = (state: Partial<PlayerState>) =>
   listeners.forEach((l) => l(state));
 
@@ -26,7 +28,7 @@ const buildUrl = (): string => {
 
 export const connect = (): void => {
   if (destroyed) return;
-  if (socket && socket.readyState === WebSocket.OPEN) return;
+  if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
 
   socket = new WebSocket(buildUrl());
 

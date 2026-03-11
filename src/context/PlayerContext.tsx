@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, type FC, type ReactNode } from 'react';
 import type { PlayerState } from '../types';
-import { addStateListener, connect, disconnect } from '../services/websocketService';
+import { addStateListener, addAuthListener, connect, disconnect } from '../services/websocketService';
 
 const defaultState: PlayerState = {
   song: undefined,
@@ -28,11 +28,15 @@ export const PlayerProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     connect();
-    const remove = addStateListener((partial) =>
+    const removeState = addStateListener((partial) =>
       dispatch({ type: 'UPDATE', payload: partial }),
     );
+    const removeAuth = addAuthListener(() =>
+      dispatch({ type: 'UPDATE', payload: { authRequired: true } }),
+    );
     return () => {
-      remove();
+      removeState();
+      removeAuth();
       disconnect();
     };
   }, []);
