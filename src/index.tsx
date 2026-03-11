@@ -18,11 +18,13 @@ const getScrollParent = (el: HTMLElement | null): HTMLElement => {
 };
 
 const TAB_BAR_HEIGHT = 40;
+const TAB_PAD: React.CSSProperties = { paddingTop: `${TAB_BAR_HEIGHT}px` };
 
 const PluginContent = () => {
   const { connected, authRequired } = usePlayer();
   const [activeTab, setActiveTab] = useState<string>('player');
   const containerRef = useRef<HTMLDivElement>(null);
+  // 52px: estimated fallback (plugin title bar height) if layout hasn't measured yet
   const [stickyTop, setStickyTop] = useState(52);
 
   useEffect(() => {
@@ -35,8 +37,6 @@ const PluginContent = () => {
 
   if (!connected) return <NotConnectedView />;
   if (authRequired) return <AuthTokenView />;
-
-  const tabPad: React.CSSProperties = { paddingTop: `${TAB_BAR_HEIGHT}px` };
 
   if (!Tabs) {
     return (
@@ -52,9 +52,9 @@ const PluginContent = () => {
             </PanelSectionRow>
           ))}
         </PanelSection>
-        {activeTab === 'player' && <div style={tabPad}><PlayerView /></div>}
-        {activeTab === 'queue' && <div style={tabPad}><QueueView /></div>}
-        {activeTab === 'search' && <div style={tabPad}><SearchView /></div>}
+        {activeTab === 'player' && <div style={TAB_PAD}><PlayerView /></div>}
+        {activeTab === 'queue' && <div style={TAB_PAD}><QueueView /></div>}
+        {activeTab === 'search' && <div style={TAB_PAD}><SearchView /></div>}
       </>
     );
   }
@@ -80,9 +80,9 @@ const PluginContent = () => {
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}
         tabs={[
-          { id: 'player', title: 'Player', content: <div style={tabPad}><PlayerView /></div> },
-          { id: 'queue', title: 'Queue', content: <div style={tabPad}><QueueView /></div> },
-          { id: 'search', title: 'Search', content: <div style={tabPad}><SearchView /></div> },
+          { id: 'player', title: 'Player', content: <div style={TAB_PAD}><PlayerView /></div> },
+          { id: 'queue', title: 'Queue', content: <div style={TAB_PAD}><QueueView /></div> },
+          { id: 'search', title: 'Search', content: <div style={TAB_PAD}><SearchView /></div> },
         ]}
       />
     </div>
