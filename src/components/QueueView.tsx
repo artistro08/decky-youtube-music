@@ -1,4 +1,4 @@
-import { PanelSection, PanelSectionRow } from '@decky/ui';
+import { ButtonItem, DialogButton, Field, PanelSection, PanelSectionRow } from '@decky/ui';
 import { useEffect, useState } from 'react';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
@@ -35,7 +35,13 @@ export const QueueView = () => {
     setQueue([]);
   };
 
-  if (loading) return <PanelSection><PanelSectionRow><div>Loading queue...</div></PanelSectionRow></PanelSection>;
+  if (loading) {
+    return (
+      <PanelSection>
+        <PanelSectionRow><div>Loading queue...</div></PanelSectionRow>
+      </PanelSection>
+    );
+  }
 
   if (queue.length === 0) {
     return (
@@ -50,62 +56,42 @@ export const QueueView = () => {
   return (
     <PanelSection title="Queue">
       <PanelSectionRow>
-        <button
-          onClick={() => { void handleClear(); }}
-          style={{
-            width: '100%',
-            padding: '6px',
-            background: 'rgba(255,255,255,0.1)',
-            border: 'none',
-            borderRadius: '4px',
-            color: 'white',
-            fontSize: '12px',
-            cursor: 'pointer',
-          }}
-        >
-          Clear Queue
-        </button>
+        <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
       </PanelSectionRow>
+
       {queue.map((item, index) => {
         const r = getRenderer(item);
         const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
         const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
         const isSelected = r?.selected ?? false;
+
         return (
           <PanelSectionRow key={index}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-              <div
-                onClick={() => { void handleJump(index); }}
-                style={{
-                  flex: 1,
-                  cursor: 'pointer',
-                  fontWeight: isSelected ? 'bold' : 'normal',
-                  fontSize: '12px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{title}</div>
-                {artist && <div style={{ color: 'var(--gpSystemLighterGrey)', fontSize: '11px' }}>{artist}</div>}
-              </div>
-              <button
+            <Field
+              label={<span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>{title}</span>}
+              description={artist || undefined}
+              onActivate={() => { void handleJump(index); }}
+              onClick={() => { void handleJump(index); }}
+              highlightOnFocus
+              focusable
+              childrenContainerWidth="min"
+              bottomSeparator="none"
+            >
+              <DialogButton
                 onClick={() => { void handleRemove(index); }}
                 style={{
-                  flexShrink: 0,
-                  width: '24px',
-                  height: '24px',
-                  padding: 0,
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  fontSize: '11px',
-                  cursor: 'pointer',
-                  lineHeight: 1,
+                  width: '28px',
+                  height: '28px',
+                  minWidth: '0',
+                  padding: '0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 ✕
-              </button>
-            </div>
+              </DialogButton>
+            </Field>
           </PanelSectionRow>
         );
       })}
