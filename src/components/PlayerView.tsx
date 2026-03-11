@@ -81,7 +81,7 @@ export const PlayerView = () => {
         </PanelSectionRow>
 
         {duration > 0 && (
-          <PanelSectionRow>
+          <div style={{ margin: '0 -16px', padding: '0 8px' }}>
             <SliderField
               label=""
               value={position}
@@ -91,7 +91,7 @@ export const PlayerView = () => {
               onChange={(val) => { void seekTo(val); }}
               showValue={false}
             />
-          </PanelSectionRow>
+          </div>
         )}
       </PanelSection>
 
@@ -130,7 +130,7 @@ export const PlayerView = () => {
 
       {/* Volume */}
       <PanelSection title="Volume">
-        <PanelSectionRow>
+        <div style={{ margin: '0 -16px', padding: '0 8px' }}>
           <SliderField
             label={muted ? 'Muted' : `${Math.round(volume)}%`}
             value={muted ? 0 : volume}
@@ -140,7 +140,7 @@ export const PlayerView = () => {
             onChange={(val) => { void setVolume(val); }}
             showValue={false}
           />
-        </PanelSectionRow>
+        </div>
         <PanelSectionRow>
           <ButtonItem onClick={() => { void toggleMute(); }}>
             {muted ? '🔇 Unmute' : '🔊 Mute'}
