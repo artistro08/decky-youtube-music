@@ -2,7 +2,7 @@ import { toaster } from '@decky/api';
 import type { QueueResponse, SearchResultItem, SongInfo } from '../types';
 import { notifyAuthRequired } from './authEvents';
 
-const BASE_URL = 'http://localhost:26538/api/v1';
+const BASE_URL = 'http://127.0.0.1:26538/api/v1';
 const TOKEN_KEY = 'ytmusic_api_token';
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);

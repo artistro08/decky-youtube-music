@@ -1,7 +1,7 @@
 import type { PlayerState, WSMessage, WSMessageType } from '../types';
 import { getToken } from './apiClient';
 
-const WS_URL = 'ws://localhost:26538/api/v1/ws';
+const WS_URL = 'ws://127.0.0.1:26538/api/v1/ws';
 const RECONNECT_DELAY_MS = 5000;
 
 type StateListener = (state: Partial<PlayerState>) => void;
