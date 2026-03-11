@@ -6,7 +6,7 @@ interface SectionProps {
 }
 
 export const Section = ({ title, children }: SectionProps) => (
-  <div>
+  <div style={{ margin: '0 -16px' }}>
     {title && (
       <div style={{
         padding: '12px 16px 4px',
