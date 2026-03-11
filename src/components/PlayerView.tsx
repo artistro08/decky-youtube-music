@@ -1,4 +1,4 @@
-import { PanelSection, PanelSectionRow, SliderField, ToggleField } from '@decky/ui';
+import { ButtonItem, DialogButton, Focusable, PanelSection, PanelSectionRow, SliderField, ToggleField } from '@decky/ui';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -13,8 +13,32 @@ import {
   togglePlay,
 } from '../services/apiClient';
 
-const REPEAT_LABELS: Record<string, string> = { NONE: 'Repeat: Off', ALL: 'Repeat: All', ONE: 'Repeat: One' };
-const REPEAT_ITERATIONS: Record<string, number> = { NONE: 1, ALL: 1, ONE: 1 };
+const REPEAT_LABELS: Record<string, string> = {
+  NONE: 'Repeat: Off',
+  ALL: 'Repeat: All',
+  ONE: 'Repeat: One',
+};
+const REPEAT_NEXT: Record<string, number> = { NONE: 1, ALL: 1, ONE: 1 };
+
+const rowBtnFirst: React.CSSProperties = {
+  marginLeft: '0px',
+  height: '30px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: '0',
+  flex: 1,
+};
+
+const rowBtn: React.CSSProperties = {
+  marginLeft: '5px',
+  height: '30px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: '0',
+  flex: 1,
+};
 
 export const PlayerView = () => {
   const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
@@ -34,7 +58,7 @@ export const PlayerView = () => {
               <img
                 src={albumArt}
                 alt="Album art"
-                style={{ width: '100%', maxWidth: '200px', borderRadius: '8px' }}
+                style={{ width: '100%', maxWidth: '180px', borderRadius: '8px' }}
               />
             </div>
           </PanelSectionRow>
@@ -45,18 +69,17 @@ export const PlayerView = () => {
       <PanelSection>
         <PanelSectionRow>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {title}
             </div>
             {artist && (
-              <div style={{ fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
                 {artist}
               </div>
             )}
           </div>
         </PanelSectionRow>
 
-        {/* Seek bar */}
         {duration > 0 && (
           <PanelSectionRow>
             <SliderField
@@ -72,61 +95,27 @@ export const PlayerView = () => {
         )}
       </PanelSection>
 
-      {/* Playback controls */}
+      {/* Prev / Play / Next — direct child of PanelSection, no PanelSectionRow */}
       <PanelSection title="Controls">
-        <PanelSectionRow>
-          <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
-            {([
-              { label: '⏮', action: previous },
-              { label: isPlaying ? '⏸' : '▶', action: togglePlay },
-              { label: '⏭', action: next },
-            ] as { label: string; action: () => void }[]).map(({ label, action }) => (
-              <button
-                key={label}
-                onClick={() => { void action(); }}
-                style={{
-                  flex: 1,
-                  padding: '8px 4px',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  fontSize: '18px',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </PanelSectionRow>
+        <Focusable
+          style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
+          flow-children="horizontal"
+        >
+          <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
+          <DialogButton style={rowBtn} onClick={() => { void togglePlay(); }}>
+            {isPlaying ? '⏸' : '▶'}
+          </DialogButton>
+          <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
+        </Focusable>
 
-        {/* Like / Dislike */}
-        <PanelSectionRow>
-          <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
-            {([
-              { label: '👍 Like', action: like },
-              { label: '👎 Dislike', action: dislike },
-            ] as { label: string; action: () => void }[]).map(({ label, action }) => (
-              <button
-                key={label}
-                onClick={() => { void action(); }}
-                style={{
-                  flex: 1,
-                  padding: '6px 4px',
-                  background: 'rgba(255,255,255,0.1)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </PanelSectionRow>
+        {/* Like / Dislike — also direct child of PanelSection */}
+        <Focusable
+          style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
+          flow-children="horizontal"
+        >
+          <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
+          <DialogButton style={rowBtn} onClick={() => { void dislike(); }}>👎 Dislike</DialogButton>
+        </Focusable>
       </PanelSection>
 
       {/* Volume */}
@@ -143,26 +132,14 @@ export const PlayerView = () => {
           />
         </PanelSectionRow>
         <PanelSectionRow>
-          <button
-            onClick={() => { void toggleMute(); }}
-            style={{
-              width: '100%',
-              padding: '6px',
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
+          <ButtonItem onClick={() => { void toggleMute(); }}>
             {muted ? '🔇 Unmute' : '🔊 Mute'}
-          </button>
+          </ButtonItem>
         </PanelSectionRow>
       </PanelSection>
 
-      {/* Shuffle & Repeat */}
-      <PanelSection title="Playback Mode">
+      {/* Playback options */}
+      <PanelSection title="Playback">
         <PanelSectionRow>
           <ToggleField
             label="Shuffle"
@@ -171,21 +148,9 @@ export const PlayerView = () => {
           />
         </PanelSectionRow>
         <PanelSectionRow>
-          <button
-            onClick={() => { void switchRepeat(REPEAT_ITERATIONS[repeat] ?? 1); }}
-            style={{
-              width: '100%',
-              padding: '6px',
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '4px',
-              color: 'white',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
+          <ButtonItem onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
             {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
-          </button>
+          </ButtonItem>
         </PanelSectionRow>
       </PanelSection>
     </>
