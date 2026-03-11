@@ -1,7 +1,8 @@
-import { ButtonItem, PanelSection, PanelSectionRow, TextField } from '@decky/ui';
+import { ButtonItem, TextField } from '@decky/ui';
 import { useState } from 'react';
 import { addToQueue, clearQueue, search, setQueueIndex } from '../services/apiClient';
 import type { SearchResultItem } from '../types';
+import { Section } from './Section';
 
 export const SearchView = () => {
   const [query, setQuery] = useState('');
@@ -29,7 +30,7 @@ export const SearchView = () => {
 
   return (
     <>
-      <PanelSection title="Search">
+      <Section title="Search">
         <TextField
           label="Search YouTube Music"
           value={query}
@@ -39,36 +40,35 @@ export const SearchView = () => {
         <ButtonItem layout="below" onClick={() => { void handleSearch(); }} disabled={searching || !query.trim()}>
           {searching ? 'Searching...' : 'Search'}
         </ButtonItem>
-      </PanelSection>
+      </Section>
 
       {searched && results.length === 0 && (
-        <PanelSection>
-          <PanelSectionRow>
-            <div style={{ color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>No results found</div>
-          </PanelSectionRow>
-        </PanelSection>
+        <Section>
+          <div style={{ padding: '8px 16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+            No results found
+          </div>
+        </Section>
       )}
 
       {results.length > 0 && (
-        <PanelSection title="Results">
+        <Section title="Results">
           {results.map((item, index) => (
-            <PanelSectionRow key={index}>
-              <ButtonItem
-                layout="below"
-                onClick={() => { void handlePlay(item); }}
-              >
-                <div style={{ textAlign: 'left', width: '100%' }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {item.title ?? 'Unknown'}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)' }}>
-                    {item.artists?.map((a) => a.name).join(', ') ?? ''}
-                  </div>
+            <ButtonItem
+              key={index}
+              layout="below"
+              onClick={() => { void handlePlay(item); }}
+            >
+              <div style={{ textAlign: 'left', width: '100%' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {item.title ?? 'Unknown'}
                 </div>
-              </ButtonItem>
-            </PanelSectionRow>
+                <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)' }}>
+                  {item.artists?.map((a) => a.name).join(', ') ?? ''}
+                </div>
+              </div>
+            </ButtonItem>
           ))}
-        </PanelSection>
+        </Section>
       )}
     </>
   );
