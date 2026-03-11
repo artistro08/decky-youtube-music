@@ -1,115 +1,69 @@
-import {
-  ButtonItem,
-  PanelSection,
-  PanelSectionRow,
-  Navigation,
-  staticClasses
-} from "@decky/ui";
-import {
-  addEventListener,
-  removeEventListener,
-  callable,
-  definePlugin,
-  toaster,
-  // routerHook
-} from "@decky/api"
-import { useState } from "react";
-import { FaShip } from "react-icons/fa";
+import { ButtonItem, PanelSection, PanelSectionRow, staticClasses } from '@decky/ui';
+import { definePlugin } from '@decky/api';
+import { ReactElement, useState } from 'react';
+import { FaMusic } from 'react-icons/fa';
 
-// import logo from "../assets/logo.png";
+import { PlayerProvider, usePlayer } from './context/PlayerContext';
+import { NotConnectedView } from './components/NotConnectedView';
+import { AuthTokenView } from './components/AuthTokenView';
+import { PlayerView } from './components/PlayerView';
+import { QueueView } from './components/QueueView';
+import { SearchView } from './components/SearchView';
 
-// This function calls the python function "add", which takes in two numbers and returns their sum (as a number)
-// Note the type annotations:
-//  the first one: [first: number, second: number] is for the arguments
-//  the second one: number is for the return value
-const add = callable<[first: number, second: number], number>("add");
+type TabId = 'player' | 'queue' | 'search';
 
-// This function calls the python function "start_timer", which takes in no arguments and returns nothing.
-// It starts a (python) timer which eventually emits the event 'timer_event'
-const startTimer = callable<[], void>("start_timer");
+const TABS: { id: TabId; title: string }[] = [
+  { id: 'player', title: 'Player' },
+  { id: 'queue', title: 'Queue' },
+  { id: 'search', title: 'Search' },
+];
 
-function Content() {
-  const [result, setResult] = useState<number | undefined>();
+const TAB_CONTENT: Record<TabId, ReactElement> = {
+  player: <PlayerView />,
+  queue: <QueueView />,
+  search: <SearchView />,
+};
 
-  const onClick = async () => {
-    const result = await add(Math.random(), Math.random());
-    setResult(result);
-  };
+const PluginContent = () => {
+  const { connected, authRequired } = usePlayer();
+  const [activeTab, setActiveTab] = useState<TabId>('player');
+
+  if (!connected) return <NotConnectedView />;
+  if (authRequired) return <AuthTokenView />;
 
   return (
-    <PanelSection title="Panel Section">
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={onClick}
-        >
-          {result ?? "Add two numbers via Python"}
-        </ButtonItem>
-      </PanelSectionRow>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => startTimer()}
-        >
-          {"Start Python timer"}
-        </ButtonItem>
-      </PanelSectionRow>
-
-      {/* <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow> */}
-
-      {/*<PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Navigation.Navigate("/decky-plugin-test");
-            Navigation.CloseSideMenus();
-          }}
-        >
-          Router
-        </ButtonItem>
-      </PanelSectionRow>*/}
-    </PanelSection>
+    <>
+      <PanelSection>
+        <PanelSectionRow>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {TABS.map(({ id, title }) => (
+              <div key={id} style={{ flex: 1, fontWeight: activeTab === id ? 'bold' : 'normal' }}>
+                <ButtonItem
+                  layout="below"
+                  onClick={() => setActiveTab(id)}
+                >
+                  {title}
+                </ButtonItem>
+              </div>
+            ))}
+          </div>
+        </PanelSectionRow>
+      </PanelSection>
+      {TAB_CONTENT[activeTab]}
+    </>
   );
 };
 
-export default definePlugin(() => {
-  console.log("Template plugin initializing, this is called once on frontend startup")
+const Content = () => (
+  <PlayerProvider>
+    <PluginContent />
+  </PlayerProvider>
+);
 
-  // serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-  //   exact: true,
-  // });
-
-  // Add an event listener to the "timer_event" event from the backend
-  const listener = addEventListener<[
-    test1: string,
-    test2: boolean,
-    test3: number
-  ]>("timer_event", (test1, test2, test3) => {
-    console.log("Template got timer_event with:", test1, test2, test3)
-    toaster.toast({
-      title: "template got timer_event",
-      body: `${test1}, ${test2}, ${test3}`
-    });
-  });
-
-  return {
-    // The name shown in various decky menus
-    name: "Test Plugin",
-    // The element displayed at the top of your plugin's menu
-    titleView: <div className={staticClasses.Title}>Decky Example Plugin</div>,
-    // The content of your plugin's menu
-    content: <Content />,
-    // The icon displayed in the plugin list
-    icon: <FaShip />,
-    // The function triggered when your plugin unloads
-    onDismount() {
-      console.log("Unloading")
-      removeEventListener("timer_event", listener);
-      // serverApi.routerHook.removeRoute("/decky-plugin-test");
-    },
-  };
-});
+export default definePlugin(() => ({
+  name: 'YouTube Music',
+  titleView: <div className={staticClasses.Title}>YouTube Music</div>,
+  content: <Content />,
+  icon: <FaMusic />,
+  onDismount() {},
+}));
