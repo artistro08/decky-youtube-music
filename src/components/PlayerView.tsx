@@ -100,7 +100,7 @@ export const PlayerView = () => {
         {DialogButton ? (
           <>
             <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', padding: '0 16px' }}
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
@@ -110,7 +110,7 @@ export const PlayerView = () => {
               <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
             </Focusable>
             <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px', padding: '0 16px' }}
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
