@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow, SliderField, ToggleField } from '@decky/ui';
+import { PanelSection, PanelSectionRow, SliderField, ToggleField } from '@decky/ui';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -75,23 +75,57 @@ export const PlayerView = () => {
       {/* Playback controls */}
       <PanelSection title="Controls">
         <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void previous(); }}>&#x23EE; Prev</ButtonItem>
-        </PanelSectionRow>
-        <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void togglePlay(); }}>
-            {isPlaying ? '\u23F8 Pause' : '\u25B6 Play'}
-          </ButtonItem>
-        </PanelSectionRow>
-        <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void next(); }}>&#x23ED; Next</ButtonItem>
+          <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+            {([
+              { label: '⏮', action: previous },
+              { label: isPlaying ? '⏸' : '▶', action: togglePlay },
+              { label: '⏭', action: next },
+            ] as { label: string; action: () => void }[]).map(({ label, action }) => (
+              <button
+                key={label}
+                onClick={() => { void action(); }}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </PanelSectionRow>
 
         {/* Like / Dislike */}
         <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void like(); }}>Like (+1)</ButtonItem>
-        </PanelSectionRow>
-        <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void dislike(); }}>Dislike (-1)</ButtonItem>
+          <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+            {([
+              { label: '👍 Like', action: like },
+              { label: '👎 Dislike', action: dislike },
+            ] as { label: string; action: () => void }[]).map(({ label, action }) => (
+              <button
+                key={label}
+                onClick={() => { void action(); }}
+                style={{
+                  flex: 1,
+                  padding: '6px 4px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </PanelSectionRow>
       </PanelSection>
 
@@ -109,9 +143,21 @@ export const PlayerView = () => {
           />
         </PanelSectionRow>
         <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void toggleMute(); }}>
-            {muted ? 'Unmute' : 'Mute'}
-          </ButtonItem>
+          <button
+            onClick={() => { void toggleMute(); }}
+            style={{
+              width: '100%',
+              padding: '6px',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '4px',
+              color: 'white',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            {muted ? '🔇 Unmute' : '🔊 Mute'}
+          </button>
         </PanelSectionRow>
       </PanelSection>
 
@@ -125,9 +171,21 @@ export const PlayerView = () => {
           />
         </PanelSectionRow>
         <PanelSectionRow>
-          <ButtonItem layout="below" onClick={() => { void switchRepeat(REPEAT_ITERATIONS[repeat] ?? 1); }}>
+          <button
+            onClick={() => { void switchRepeat(REPEAT_ITERATIONS[repeat] ?? 1); }}
+            style={{
+              width: '100%',
+              padding: '6px',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '4px',
+              color: 'white',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
             {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
-          </ButtonItem>
+          </button>
         </PanelSectionRow>
       </PanelSection>
     </>

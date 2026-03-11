@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow, staticClasses } from '@decky/ui';
+import { PanelSection, PanelSectionRow, staticClasses } from '@decky/ui';
 import { definePlugin } from '@decky/api';
 import { ReactElement, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
@@ -35,16 +35,25 @@ const PluginContent = () => {
     <>
       <PanelSection>
         <PanelSectionRow>
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div style={{ display: 'flex', gap: '4px', width: '100%' }}>
             {TABS.map(({ id, title }) => (
-              <div key={id} style={{ flex: 1, fontWeight: activeTab === id ? 'bold' : 'normal' }}>
-                <ButtonItem
-                  layout="below"
-                  onClick={() => setActiveTab(id)}
-                >
-                  {title}
-                </ButtonItem>
-              </div>
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                style={{
+                  flex: 1,
+                  padding: '6px 4px',
+                  background: activeTab === id ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: activeTab === id ? 'bold' : 'normal',
+                  cursor: 'pointer',
+                }}
+              >
+                {title}
+              </button>
             ))}
           </div>
         </PanelSectionRow>

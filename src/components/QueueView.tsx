@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSection, PanelSectionRow } from '@decky/ui';
+import { PanelSection, PanelSectionRow } from '@decky/ui';
 import { useEffect, useState } from 'react';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
@@ -50,7 +50,21 @@ export const QueueView = () => {
   return (
     <PanelSection title="Queue">
       <PanelSectionRow>
-        <ButtonItem layout="below" onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
+        <button
+          onClick={() => { void handleClear(); }}
+          style={{
+            width: '100%',
+            padding: '6px',
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            borderRadius: '4px',
+            color: 'white',
+            fontSize: '12px',
+            cursor: 'pointer',
+          }}
+        >
+          Clear Queue
+        </button>
       </PanelSectionRow>
       {queue.map((item, index) => {
         const r = getRenderer(item);
@@ -73,9 +87,24 @@ export const QueueView = () => {
                 <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{title}</div>
                 {artist && <div style={{ color: 'var(--gpSystemLighterGrey)', fontSize: '11px' }}>{artist}</div>}
               </div>
-              <ButtonItem layout="below" onClick={() => { void handleRemove(index); }}>
+              <button
+                onClick={() => { void handleRemove(index); }}
+                style={{
+                  flexShrink: 0,
+                  width: '24px',
+                  height: '24px',
+                  padding: 0,
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                }}
+              >
                 ✕
-              </ButtonItem>
+              </button>
             </div>
           </PanelSectionRow>
         );
