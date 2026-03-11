@@ -64,8 +64,8 @@ const PluginContent = () => {
       className="ytm-tabs-container"
       style={{ height: 'calc(100vh - 40px)', display: 'flex', flexDirection: 'column' }}
     >
-      {gamepadTabbedPageClasses?.TabHeaderRowWrapper && (
-        <style>{`
+      <style>{[
+        gamepadTabbedPageClasses?.TabHeaderRowWrapper && `
           .ytm-tabs-container .${gamepadTabbedPageClasses.TabHeaderRowWrapper} {
             position: sticky;
             top: ${stickyTop}px;
@@ -73,8 +73,14 @@ const PluginContent = () => {
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(8px);
           }
-        `}</style>
-      )}
+        `,
+        staticClasses?.TabContentColumn && `
+          .ytm-tabs-container .${staticClasses.TabContentColumn} {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+        `,
+      ].filter(Boolean).join('')}</style>
       <Tabs
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}
