@@ -74,23 +74,25 @@ export const QueueView = () => {
               onClick={() => { void handleJump(index); }}
               highlightOnFocus
               focusable
-              childrenContainerWidth="min"
+              childrenContainerWidth={DialogButton ? 'min' : undefined}
               bottomSeparator="none"
             >
-              <DialogButton
-                onClick={() => { void handleRemove(index); }}
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  minWidth: '0',
-                  padding: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                ✕
-              </DialogButton>
+              {DialogButton && (
+                <DialogButton
+                  onClick={() => { void handleRemove(index); }}
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    minWidth: '0',
+                    padding: '0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  ✕
+                </DialogButton>
+              )}
             </Field>
           </PanelSectionRow>
         );

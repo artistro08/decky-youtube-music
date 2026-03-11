@@ -95,27 +95,37 @@ export const PlayerView = () => {
         )}
       </PanelSection>
 
-      {/* Prev / Play / Next — direct child of PanelSection, no PanelSectionRow */}
+      {/* Prev / Play / Next */}
       <PanelSection title="Controls">
-        <Focusable
-          style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
-          flow-children="horizontal"
-        >
-          <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
-          <DialogButton style={rowBtn} onClick={() => { void togglePlay(); }}>
-            {isPlaying ? '⏸' : '▶'}
-          </DialogButton>
-          <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
-        </Focusable>
-
-        {/* Like / Dislike — also direct child of PanelSection */}
-        <Focusable
-          style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
-          flow-children="horizontal"
-        >
-          <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
-          <DialogButton style={rowBtn} onClick={() => { void dislike(); }}>👎 Dislike</DialogButton>
-        </Focusable>
+        {DialogButton ? (
+          <>
+            <Focusable
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
+              flow-children="horizontal"
+            >
+              <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
+              <DialogButton style={rowBtn} onClick={() => { void togglePlay(); }}>
+                {isPlaying ? '⏸' : '▶'}
+              </DialogButton>
+              <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
+            </Focusable>
+            <Focusable
+              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
+              flow-children="horizontal"
+            >
+              <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
+              <DialogButton style={rowBtn} onClick={() => { void dislike(); }}>👎 Dislike</DialogButton>
+            </Focusable>
+          </>
+        ) : (
+          <>
+            <PanelSectionRow><ButtonItem onClick={() => { void previous(); }}>⏮ Previous</ButtonItem></PanelSectionRow>
+            <PanelSectionRow><ButtonItem onClick={() => { void togglePlay(); }}>{isPlaying ? '⏸ Pause' : '▶ Play'}</ButtonItem></PanelSectionRow>
+            <PanelSectionRow><ButtonItem onClick={() => { void next(); }}>⏭ Next</ButtonItem></PanelSectionRow>
+            <PanelSectionRow><ButtonItem onClick={() => { void like(); }}>👍 Like</ButtonItem></PanelSectionRow>
+            <PanelSectionRow><ButtonItem onClick={() => { void dislike(); }}>👎 Dislike</ButtonItem></PanelSectionRow>
+          </>
+        )}
       </PanelSection>
 
       {/* Volume */}
