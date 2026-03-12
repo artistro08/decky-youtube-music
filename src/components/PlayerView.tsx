@@ -45,6 +45,29 @@ const rowBtn: React.CSSProperties = {
 
 // Wraps a SliderField in a 12px-padded container and removes Decky's
 // hardcoded min-width (270px) by finding the offending element at mount.
+const applyInnerPadding = (el: HTMLElement) => {
+  el.style.paddingLeft = '10px';
+  el.style.paddingRight = '10px';
+};
+
+const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const first = ref.current?.firstElementChild as HTMLElement | null;
+    if (first) applyInnerPadding(first);
+  }, []);
+  return <div ref={ref}><ButtonItem {...props} /></div>;
+};
+
+const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const first = ref.current?.firstElementChild as HTMLElement | null;
+    if (first) applyInnerPadding(first);
+  }, []);
+  return <div ref={ref}><ToggleField {...props} /></div>;
+};
+
 const PaddedSlider = (props: SliderFieldProps) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -158,21 +181,21 @@ export const PlayerView = () => {
           onChange={(val) => { void setVolume(val); }}
           showValue={false}
         />
-        <ButtonItem onClick={() => { void toggleMute(); }}>
+        <PaddedButton onClick={() => { void toggleMute(); }}>
           {muted ? '🔇 Unmute' : '🔊 Mute'}
-        </ButtonItem>
+        </PaddedButton>
       </Section>
 
       {/* Playback options */}
       <Section title="Playback">
-        <ToggleField
+        <PaddedToggle
           label="Shuffle"
           checked={isShuffled}
           onChange={() => { void shuffle(); }}
         />
-        <ButtonItem onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
+        <PaddedButton onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
           {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
-        </ButtonItem>
+        </PaddedButton>
       </Section>
     </>
   );

@@ -1,8 +1,20 @@
 import { ButtonItem, DialogButton, Field, Focusable } from '@decky/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
+
+const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const first = ref.current?.firstElementChild as HTMLElement | null;
+    if (first) {
+      first.style.paddingLeft = '10px';
+      first.style.paddingRight = '10px';
+    }
+  }, []);
+  return <div ref={ref}><ButtonItem {...props} /></div>;
+};
 
 const getRenderer = (item: QueueItem) =>
   item.playlistPanelVideoRenderer ??
@@ -58,7 +70,7 @@ export const QueueView = () => {
 
   return (
     <Section title="Queue">
-      <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
+      <PaddedButton onClick={() => { void handleClear(); }}>Clear Queue</PaddedButton>
 
       {queue.map((item, index) => {
         const r = getRenderer(item);
