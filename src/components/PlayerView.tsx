@@ -46,8 +46,8 @@ const rowBtn: React.CSSProperties = {
 // Wraps a SliderField in a 12px-padded container and removes Decky's
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el: HTMLElement) => {
-  el.style.paddingLeft = '10px';
-  el.style.paddingRight = '10px';
+  el.style.paddingLeft = '12px';
+  el.style.paddingRight = '12px';
 };
 
 const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {

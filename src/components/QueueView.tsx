@@ -9,8 +9,8 @@ const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {
   useEffect(() => {
     const first = ref.current?.firstElementChild as HTMLElement | null;
     if (first) {
-      first.style.paddingLeft = '10px';
-      first.style.paddingRight = '10px';
+      first.style.paddingLeft = '12px';
+      first.style.paddingRight = '12px';
     }
   }, []);
   return <div ref={ref}><ButtonItem {...props} /></div>;
@@ -51,7 +51,7 @@ export const QueueView = () => {
   if (loading) {
     return (
       <Section>
-        <div style={{ padding: '16px 10px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+        <div style={{ padding: '16px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
           Loading queue...
         </div>
       </Section>
@@ -61,7 +61,7 @@ export const QueueView = () => {
   if (queue.length === 0) {
     return (
       <Section title="Queue">
-        <div style={{ padding: '8px 10px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+        <div style={{ padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
           Queue is empty
         </div>
       </Section>
@@ -82,7 +82,7 @@ export const QueueView = () => {
           return (
             <Focusable
               key={index}
-              style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '10px', paddingRight: '10px', paddingTop: '4px', paddingBottom: '4px' }}
+              style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '12px', paddingRight: '12px', paddingTop: '12px', paddingBottom: '12px' }}
               flow-children="horizontal"
             >
               <DialogButton
