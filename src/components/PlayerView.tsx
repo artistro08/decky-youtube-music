@@ -66,7 +66,7 @@ export const PlayerView = () => {
 
       {/* Track info */}
       <Section>
-        <div style={{ textAlign: 'center', padding: '8px 16px' }}>
+        <div style={{ textAlign: 'center', padding: '8px 0' }}>
           <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title}
           </div>
