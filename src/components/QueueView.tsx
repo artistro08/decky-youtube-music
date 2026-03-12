@@ -39,7 +39,7 @@ export const QueueView = () => {
   if (loading) {
     return (
       <Section>
-        <div style={{ padding: '16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+        <div style={{ padding: '16px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
           Loading queue...
         </div>
       </Section>
@@ -49,7 +49,7 @@ export const QueueView = () => {
   if (queue.length === 0) {
     return (
       <Section title="Queue">
-        <div style={{ padding: '8px 16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+        <div style={{ padding: '8px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
           Queue is empty
         </div>
       </Section>
