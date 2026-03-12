@@ -1,4 +1,6 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
+import type { SliderFieldProps } from '@decky/ui';
+import { useEffect, useRef } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -41,6 +43,24 @@ const rowBtn: React.CSSProperties = {
   flex: 1,
 };
 
+// Wraps a SliderField in a 12px-padded container and removes Decky's
+// hardcoded min-width (270px) by finding the offending element at mount.
+const PaddedSlider = (props: SliderFieldProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.querySelectorAll<HTMLElement>('*').forEach((el) => {
+      if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
+        el.style.minWidth = '0';
+    });
+  }, []);
+  return (
+    <div ref={ref} style={{ padding: '0 12px' }}>
+      <SliderField {...props} />
+    </div>
+  );
+};
+
 export const PlayerView = () => {
   const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
 
@@ -77,7 +97,7 @@ export const PlayerView = () => {
           )}
         </div>
         {duration > 0 && (
-          <SliderField
+          <PaddedSlider
             label=""
             value={position}
             min={0}
@@ -124,7 +144,7 @@ export const PlayerView = () => {
 
       {/* Volume */}
       <Section title="Volume">
-        <SliderField
+        <PaddedSlider
           label={muted ? 'Muted' : `${Math.round(volume)}%`}
           value={muted ? 0 : volume}
           min={0}
