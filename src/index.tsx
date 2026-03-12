@@ -71,12 +71,6 @@ const PluginContent = () => {
             backdrop-filter: blur(8px);
           }
         `,
-        staticClasses?.TabContentColumn && `
-          .ytm-tabs-container .${staticClasses.TabContentColumn} {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-          }
-        `,
       ].filter(Boolean).join('')}</style>
       <Tabs
         activeTab={activeTab}
