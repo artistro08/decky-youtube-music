@@ -59,6 +59,7 @@ const PluginContent = () => {
     <div
       ref={containerRef}
       className="ytm-tabs-container"
+      style={{ height: 'calc(100vh - 40px)' }}
     >
       <style>{[
         gamepadTabbedPageClasses?.TabHeaderRowWrapper && `
