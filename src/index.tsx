@@ -34,15 +34,23 @@ const TabsContainer = () => {
     setHeight(window.innerHeight - containerRect.top);
   }, []);
 
-  // Zero the Decky Tabs content scroll container padding.
-  // The _TabContentsScroll element has 2.8vw left/right padding injected by
-  // Decky's CSS. It renders outside our containerRef DOM subtree (portal), so
-  // we query the document directly using its stable class name fragment.
-  // Runs on mount and on every tab switch in case the element is recreated.
+  // Adjust Decky Tabs layout on mount and every tab switch.
   useEffect(() => {
+    // Zero the content scroll container's injected left/right padding.
     document.querySelectorAll<HTMLElement>('[class*="TabContentsScroll"]').forEach((el) => {
       el.style.paddingLeft = '0';
       el.style.paddingRight = '0';
+    });
+
+    // Shrink the tab bar row height.
+    document.querySelectorAll<HTMLElement>('[class*="TabHeaderRowWrapper"]').forEach((el) => {
+      el.style.minHeight = '32px';
+    });
+
+    // Scale down the L1/R1 glyph icons.
+    document.querySelectorAll<HTMLElement>('[class*="Glyphs"]').forEach((el) => {
+      el.style.transform = 'scale(0.65)';
+      el.style.transformOrigin = 'center center';
     });
   }, [activeTab]);
 

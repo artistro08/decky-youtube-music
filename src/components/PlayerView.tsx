@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
+  getVolume,
   like,
   next,
   previous,
@@ -89,27 +90,59 @@ const PaddedSlider = (props: SliderFieldProps) => {
   );
 };
 
+// Module-level cache — survives PlayerView unmount/remount when the user
+// switches tabs, so the slider restores the last known value rather than
+// whatever the context (potentially stale) reports at remount time.
+let _cachedVolume: number | null = null;
+let _cachedMuted: boolean | null = null;
+
 export const PlayerView = () => {
-  const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
+  const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position, connected } = usePlayer();
 
   // Local display state for the volume slider.
   // Problems solved:
   //   1. Touch drag fires onChange rapidly; multiple API calls come back via WebSocket
   //      out of order and snap the slider to stale values mid-drag.
   //   2. D-pad presses jump because WebSocket resets displayVolume between presses.
-  //   3. Hard to exceed low values because server response overrides before next press.
+  //   3. muted from context forced value=0, making every d-pad press compute from 0
+  //      so the slider could never increase beyond 1 step.
+  //   4. 500ms cooldown was shorter than the API round-trip, letting stale WebSocket
+  //      events snap the slider back after the cooldown expired.
+  //   5. PLAYER_INFO messages with undefined volume defaulted to 100, corrupting
+  //      context on tab switch. Fixed in websocketService + cached here as backup.
   //
-  // Fix: block WebSocket syncs while the user is adjusting (+ 500ms cooldown after),
-  // and debounce the API call so only the final value in a burst is sent.
-  const [displayVolume, setDisplayVolume] = useState(volume);
+  // Fix: block WebSocket syncs while adjusting (+ 1500ms cooldown after last change),
+  // always pass displayVolume (not muted?0) as the slider value so d-pad computes
+  // from the real level, and track displayMuted locally so the label/button stay
+  // correct without letting the WebSocket muted field interfere with the slider.
+  const [displayVolume, setDisplayVolume] = useState(() => _cachedVolume ?? volume);
+  const [displayMuted, setDisplayMuted] = useState(() => _cachedMuted ?? muted);
   const adjustingRef = useRef(false);
   const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync from WebSocket only when the user is not actively adjusting.
+  // The WebSocket `volume` field is unreliable for display — it appears to come
+  // from a different source/scale than the 0-100 value the API accepts and the
+  // app displays (e.g. the user sets 55, app shows 55, WebSocket reports 24).
+  // Syncing displayVolume from the WebSocket would corrupt the slider.
+  //
+  // Fetch the real volume via HTTP whenever connected. This covers both first
+  // load (no cached value) and reconnections after YouTube Music restarts
+  // (where _cachedVolume from the previous session would otherwise be stale).
   useEffect(() => {
-    if (!adjustingRef.current) setDisplayVolume(volume);
-  }, [volume]);
+    if (!connected) return;
+    void getVolume().then((res) => {
+      if (res !== null && !adjustingRef.current) {
+        _cachedVolume = res.state;
+        setDisplayVolume(res.state);
+      }
+    });
+  }, [connected]);
+
+  // muted is a simple boolean — keep it in sync with context (no scale issue).
+  useEffect(() => {
+    if (!adjustingRef.current) { _cachedMuted = muted; setDisplayMuted(muted); }
+  }, [muted]);
 
   // Cleanup timers on unmount.
   useEffect(() => () => {
@@ -119,11 +152,13 @@ export const PlayerView = () => {
 
   const handleVolumeChange = (val: number) => {
     adjustingRef.current = true;
+    _cachedVolume = val;
     setDisplayVolume(val);
 
-    // Keep blocking WebSocket sync for 500ms after the last adjustment.
+    // Keep adjustingRef true for 1500ms so the muted WebSocket sync and the
+    // mount-time getVolume() fetch don't overwrite the user's in-flight value.
     if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
-    cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 500);
+    cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 1500);
 
     // Debounce the API call — only fire after 300ms of no further changes.
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -211,8 +246,8 @@ export const PlayerView = () => {
       {/* Volume */}
       <Section title="Volume">
         <PaddedSlider
-          label={muted ? 'Muted' : `${Math.round(displayVolume)}%`}
-          value={muted ? 0 : displayVolume}
+          label={displayMuted ? 'Muted' : `${Math.round(displayVolume)}%`}
+          value={displayVolume}
           min={0}
           max={100}
           step={1}
@@ -220,7 +255,7 @@ export const PlayerView = () => {
           showValue={false}
         />
         <PaddedButton onClick={() => { void toggleMute(); }}>
-          {muted ? '🔇 Unmute' : '🔊 Mute'}
+          {displayMuted ? '🔇 Unmute' : '🔊 Mute'}
         </PaddedButton>
       </Section>
 

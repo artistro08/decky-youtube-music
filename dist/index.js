@@ -164,6 +164,7 @@ const shuffle = () => post('/shuffle');
 const switchRepeat = (iteration) => post('/switch-repeat', { iteration });
 const like = () => post('/like');
 const dislike = () => post('/dislike');
+const getVolume = () => get('/volume');
 // Queue
 const getQueue = () => get('/queue');
 const removeFromQueue = (index) => del(`/queue/${index}`);
@@ -231,19 +232,26 @@ const resetAndConnect = () => {
 const handleMessage = (msg) => {
     const type = msg.type;
     switch (type) {
-        case 'PLAYER_INFO':
-            notify({
+        case 'PLAYER_INFO': {
+            // Only include volume/muted if the server actually sent them.
+            // `?? 100` / `?? false` would silently reset to defaults when the field
+            // is absent, corrupting whatever the user last set.
+            const playerInfo = {
                 song: msg.song,
                 isPlaying: msg.isPlaying ?? false,
-                muted: msg.muted ?? false,
                 position: msg.position ?? 0,
-                volume: msg.volume ?? 100,
                 repeat: msg.repeat ?? 'NONE',
                 shuffle: msg.shuffle ?? false,
                 connected: true,
                 authRequired: false,
-            });
+            };
+            if (msg.volume !== undefined)
+                playerInfo.volume = msg.volume;
+            if (msg.muted !== undefined)
+                playerInfo.muted = msg.muted;
+            notify(playerInfo);
             break;
+        }
         case 'VIDEO_CHANGED':
             notify({ song: msg.song, position: 0 });
             break;
@@ -253,9 +261,15 @@ const handleMessage = (msg) => {
         case 'POSITION_CHANGED':
             notify({ position: msg.position ?? 0 });
             break;
-        case 'VOLUME_CHANGED':
-            notify({ volume: msg.volume ?? 100, muted: msg.muted ?? false });
+        case 'VOLUME_CHANGED': {
+            const volUpdate = {};
+            if (msg.volume !== undefined)
+                volUpdate.volume = msg.volume;
+            if (msg.muted !== undefined)
+                volUpdate.muted = msg.muted;
+            notify(volUpdate);
             break;
+        }
         case 'REPEAT_CHANGED':
             notify({ repeat: msg.repeat ?? 'NONE' });
             break;
@@ -298,8 +312,8 @@ const PlayerProvider = ({ children }) => {
 };
 const usePlayer = () => SP_REACT.useContext(PlayerContext);
 
-const Section = ({ title, noPull, children }) => (SP_JSX.jsxs("div", { style: noPull ? undefined : { margin: '0 -10px' }, children: [title && (SP_JSX.jsx("div", { style: {
-                padding: '12px 10px 4px',
+const Section = ({ title, noPull, children }) => (SP_JSX.jsxs("div", { style: noPull ? undefined : { margin: '0 -12px' }, children: [title && (SP_JSX.jsx("div", { style: {
+                padding: noPull ? '12px 0 4px' : '12px 12px 4px',
                 fontSize: '11px',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
@@ -307,7 +321,7 @@ const Section = ({ title, noPull, children }) => (SP_JSX.jsxs("div", { style: no
                 letterSpacing: '0.04em',
             }, children: title })), children] }));
 
-const NotConnectedView = () => (SP_JSX.jsx(Section, { title: "YouTube Music", children: SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '16px', color: 'var(--gpSystemLighterGrey)' }, children: [SP_JSX.jsx("div", { style: { fontSize: '32px', marginBottom: '8px' }, children: "\uD83C\uDFB5" }), SP_JSX.jsx("div", { style: { fontWeight: 'bold', marginBottom: '8px' }, children: "Not Connected" }), SP_JSX.jsxs("div", { style: { fontSize: '12px', lineHeight: '1.4' }, children: ["Open YouTube Music and enable the ", SP_JSX.jsx("strong", { children: "API Server" }), " plugin in its settings. The plugin will connect automatically."] })] }) }));
+const NotConnectedView = () => (SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '16px', color: 'var(--gpSystemLighterGrey)' }, children: [SP_JSX.jsx("div", { style: { fontSize: '32px', marginBottom: '8px' }, children: "\uD83C\uDFB5" }), SP_JSX.jsx("div", { style: { fontWeight: 'bold', marginBottom: '8px' }, children: "Not Connected" }), SP_JSX.jsxs("div", { style: { fontSize: '12px', lineHeight: '1.4' }, children: ["Open YouTube Music and enable the ", SP_JSX.jsx("strong", { children: "API Server" }), " plugin in its settings. The plugin will connect automatically."] })] }) }));
 
 const AuthTokenView = () => {
     const [token, setTokenInput] = SP_REACT.useState('');
@@ -347,27 +361,137 @@ const rowBtn = {
 };
 // Wraps a SliderField in a 12px-padded container and removes Decky's
 // hardcoded min-width (270px) by finding the offending element at mount.
+const applyInnerPadding = (el) => {
+    el.style.paddingLeft = '12px';
+    el.style.paddingRight = '12px';
+};
+const PaddedButton$1 = (props) => {
+    const ref = SP_REACT.useRef(null);
+    SP_REACT.useEffect(() => {
+        const first = ref.current?.firstElementChild;
+        if (first)
+            applyInnerPadding(first);
+    }, []);
+    return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ButtonItem, { ...props }) });
+};
+const PaddedToggle = (props) => {
+    const ref = SP_REACT.useRef(null);
+    SP_REACT.useEffect(() => {
+        const first = ref.current?.firstElementChild;
+        if (first)
+            applyInnerPadding(first);
+    }, []);
+    return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ToggleField, { ...props }) });
+};
 const PaddedSlider = (props) => {
     const ref = SP_REACT.useRef(null);
     SP_REACT.useEffect(() => {
         if (!ref.current)
             return;
+        const firstChild = ref.current.firstElementChild;
+        if (firstChild) {
+            firstChild.style.paddingLeft = '10px';
+            firstChild.style.paddingRight = '10px';
+        }
         ref.current.querySelectorAll('*').forEach((el) => {
             if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
                 el.style.minWidth = '0';
         });
     }, []);
-    return (SP_JSX.jsx("div", { ref: ref, style: { padding: '0 10px' }, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
+    return (SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
 };
+// Module-level cache — survives PlayerView unmount/remount when the user
+// switches tabs, so the slider restores the last known value rather than
+// whatever the context (potentially stale) reports at remount time.
+let _cachedVolume = null;
+let _cachedMuted = null;
 const PlayerView = () => {
-    const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
+    const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position, connected } = usePlayer();
+    // Local display state for the volume slider.
+    // Problems solved:
+    //   1. Touch drag fires onChange rapidly; multiple API calls come back via WebSocket
+    //      out of order and snap the slider to stale values mid-drag.
+    //   2. D-pad presses jump because WebSocket resets displayVolume between presses.
+    //   3. muted from context forced value=0, making every d-pad press compute from 0
+    //      so the slider could never increase beyond 1 step.
+    //   4. 500ms cooldown was shorter than the API round-trip, letting stale WebSocket
+    //      events snap the slider back after the cooldown expired.
+    //   5. PLAYER_INFO messages with undefined volume defaulted to 100, corrupting
+    //      context on tab switch. Fixed in websocketService + cached here as backup.
+    //
+    // Fix: block WebSocket syncs while adjusting (+ 1500ms cooldown after last change),
+    // always pass displayVolume (not muted?0) as the slider value so d-pad computes
+    // from the real level, and track displayMuted locally so the label/button stay
+    // correct without letting the WebSocket muted field interfere with the slider.
+    const [displayVolume, setDisplayVolume] = SP_REACT.useState(() => _cachedVolume ?? volume);
+    const [displayMuted, setDisplayMuted] = SP_REACT.useState(() => _cachedMuted ?? muted);
+    const adjustingRef = SP_REACT.useRef(false);
+    const cooldownTimer = SP_REACT.useRef(null);
+    const debounceTimer = SP_REACT.useRef(null);
+    // The WebSocket `volume` field is unreliable for display — it appears to come
+    // from a different source/scale than the 0-100 value the API accepts and the
+    // app displays (e.g. the user sets 55, app shows 55, WebSocket reports 24).
+    // Syncing displayVolume from the WebSocket would corrupt the slider.
+    //
+    // Fetch the real volume via HTTP whenever connected. This covers both first
+    // load (no cached value) and reconnections after YouTube Music restarts
+    // (where _cachedVolume from the previous session would otherwise be stale).
+    SP_REACT.useEffect(() => {
+        if (!connected)
+            return;
+        void getVolume().then((res) => {
+            if (res !== null && !adjustingRef.current) {
+                _cachedVolume = res.state;
+                setDisplayVolume(res.state);
+            }
+        });
+    }, [connected]);
+    // muted is a simple boolean — keep it in sync with context (no scale issue).
+    SP_REACT.useEffect(() => {
+        if (!adjustingRef.current) {
+            _cachedMuted = muted;
+            setDisplayMuted(muted);
+        }
+    }, [muted]);
+    // Cleanup timers on unmount.
+    SP_REACT.useEffect(() => () => {
+        if (cooldownTimer.current)
+            clearTimeout(cooldownTimer.current);
+        if (debounceTimer.current)
+            clearTimeout(debounceTimer.current);
+    }, []);
+    const handleVolumeChange = (val) => {
+        adjustingRef.current = true;
+        _cachedVolume = val;
+        setDisplayVolume(val);
+        // Keep adjustingRef true for 1500ms so the muted WebSocket sync and the
+        // mount-time getVolume() fetch don't overwrite the user's in-flight value.
+        if (cooldownTimer.current)
+            clearTimeout(cooldownTimer.current);
+        cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 1500);
+        // Debounce the API call — only fire after 300ms of no further changes.
+        if (debounceTimer.current)
+            clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => { void setVolume(val); }, 300);
+    };
     const albumArt = song?.albumArt;
     const title = song?.title ?? 'Nothing playing';
     const artist = song?.artist ?? '';
     const duration = song?.songDuration ?? 0;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), SP_JSX.jsxs(Section, { children: [SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '8px 0' }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), duration > 0 && (SP_JSX.jsx(PaddedSlider, { label: "", value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }))] }), SP_JSX.jsx(Section, { title: "Controls", noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: "\u23EE" }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void togglePlay(); }, children: isPlaying ? '⏸' : '▶' }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void next(); }, children: "\u23ED" })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: "\uD83D\uDC4D Like" }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void dislike(); }, children: "\uD83D\uDC4E Dislike" })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void previous(); }, children: "\u23EE Previous" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? '⏸ Pause' : '▶ Play' }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void next(); }, children: "\u23ED Next" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: "\uD83D\uDC4D Like" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: "\uD83D\uDC4E Dislike" })] })) }), SP_JSX.jsxs(Section, { title: "Volume", children: [SP_JSX.jsx(PaddedSlider, { label: muted ? 'Muted' : `${Math.round(volume)}%`, value: muted ? 0 : volume, min: 0, max: 100, step: 1, onChange: (val) => { void setVolume(val); }, showValue: false }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void toggleMute(); }, children: muted ? '🔇 Unmute' : '🔊 Mute' })] }), SP_JSX.jsxs(Section, { title: "Playback", children: [SP_JSX.jsx(DFL.ToggleField, { label: "Shuffle", checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: REPEAT_LABELS[repeat] ?? 'Repeat: Off' })] })] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), SP_JSX.jsxs(Section, { children: [SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '8px 0' }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), duration > 0 && (SP_JSX.jsx(PaddedSlider, { label: "", value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }))] }), SP_JSX.jsx(Section, { title: "Controls", noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: "\u23EE" }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void togglePlay(); }, children: isPlaying ? '⏸' : '▶' }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void next(); }, children: "\u23ED" })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: "\uD83D\uDC4D Like" }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void dislike(); }, children: "\uD83D\uDC4E Dislike" })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void previous(); }, children: "\u23EE Previous" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? '⏸ Pause' : '▶ Play' }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void next(); }, children: "\u23ED Next" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: "\uD83D\uDC4D Like" }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: "\uD83D\uDC4E Dislike" })] })) }), SP_JSX.jsxs(Section, { title: "Volume", children: [SP_JSX.jsx(PaddedSlider, { label: displayMuted ? 'Muted' : `${Math.round(displayVolume)}%`, value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }), SP_JSX.jsx(PaddedButton$1, { onClick: () => { void toggleMute(); }, children: displayMuted ? '🔇 Unmute' : '🔊 Mute' })] }), SP_JSX.jsxs(Section, { title: "Playback", children: [SP_JSX.jsx(PaddedToggle, { label: "Shuffle", checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(PaddedButton$1, { onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: REPEAT_LABELS[repeat] ?? 'Repeat: Off' })] })] }));
 };
 
+const PaddedButton = (props) => {
+    const ref = SP_REACT.useRef(null);
+    SP_REACT.useEffect(() => {
+        const first = ref.current?.firstElementChild;
+        if (first) {
+            first.style.paddingLeft = '12px';
+            first.style.paddingRight = '12px';
+        }
+    }, []);
+    return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ButtonItem, { ...props }) });
+};
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
     item.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer;
 const QueueView = () => {
@@ -395,18 +519,18 @@ const QueueView = () => {
         setQueue([]);
     };
     if (loading) {
-        return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '16px 10px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Loading queue..." }) }));
+        return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '16px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Loading queue..." }) }));
     }
     if (queue.length === 0) {
-        return (SP_JSX.jsx(Section, { title: "Queue", children: SP_JSX.jsx("div", { style: { padding: '8px 10px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
+        return (SP_JSX.jsx(Section, { title: "Queue", children: SP_JSX.jsx("div", { style: { padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
     }
-    return (SP_JSX.jsxs(Section, { title: "Queue", children: [SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void handleClear(); }, children: "Clear Queue" }), queue.map((item, index) => {
+    return (SP_JSX.jsxs(Section, { title: "Queue", children: [SP_JSX.jsx(PaddedButton, { onClick: () => { void handleClear(); }, children: "Clear Queue" }), queue.map((item, index) => {
                 const r = getRenderer(item);
                 const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
                 const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
                 const isSelected = r?.selected ?? false;
                 if (DFL.DialogButton) {
-                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { style: {
+                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '12px', paddingRight: '12px', paddingTop: '4px', paddingBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { style: {
                                     flex: 1,
                                     textAlign: 'left',
                                     height: 'auto',
@@ -454,15 +578,21 @@ const TabsContainer = () => {
         }
         setHeight(window.innerHeight - containerRect.top);
     }, []);
-    // Zero the Decky Tabs content scroll container padding.
-    // The _TabContentsScroll element has 2.8vw left/right padding injected by
-    // Decky's CSS. It renders outside our containerRef DOM subtree (portal), so
-    // we query the document directly using its stable class name fragment.
-    // Runs on mount and on every tab switch in case the element is recreated.
+    // Adjust Decky Tabs layout on mount and every tab switch.
     SP_REACT.useEffect(() => {
+        // Zero the content scroll container's injected left/right padding.
         document.querySelectorAll('[class*="TabContentsScroll"]').forEach((el) => {
             el.style.paddingLeft = '0';
             el.style.paddingRight = '0';
+        });
+        // Shrink the tab bar row height.
+        document.querySelectorAll('[class*="TabHeaderRowWrapper"]').forEach((el) => {
+            el.style.minHeight = '32px';
+        });
+        // Scale down the L1/R1 glyph icons.
+        document.querySelectorAll('[class*="Glyphs"]').forEach((el) => {
+            el.style.transform = 'scale(0.65)';
+            el.style.transformOrigin = 'center center';
         });
     }, [activeTab]);
     return (SP_JSX.jsx("div", { ref: containerRef, style: { height }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [

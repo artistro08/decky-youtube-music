@@ -74,19 +74,24 @@ const handleMessage = (msg: WSMessage): void => {
   const type = msg.type as WSMessageType;
 
   switch (type) {
-    case 'PLAYER_INFO':
-      notify({
+    case 'PLAYER_INFO': {
+      // Only include volume/muted if the server actually sent them.
+      // `?? 100` / `?? false` would silently reset to defaults when the field
+      // is absent, corrupting whatever the user last set.
+      const playerInfo: Partial<PlayerState> = {
         song: msg.song,
         isPlaying: msg.isPlaying ?? false,
-        muted: msg.muted ?? false,
         position: msg.position ?? 0,
-        volume: msg.volume ?? 100,
         repeat: msg.repeat ?? 'NONE',
         shuffle: msg.shuffle ?? false,
         connected: true,
         authRequired: false,
-      });
+      };
+      if (msg.volume !== undefined) playerInfo.volume = msg.volume;
+      if (msg.muted !== undefined) playerInfo.muted = msg.muted;
+      notify(playerInfo);
       break;
+    }
     case 'VIDEO_CHANGED':
       notify({ song: msg.song, position: 0 });
       break;
@@ -96,9 +101,13 @@ const handleMessage = (msg: WSMessage): void => {
     case 'POSITION_CHANGED':
       notify({ position: msg.position ?? 0 });
       break;
-    case 'VOLUME_CHANGED':
-      notify({ volume: msg.volume ?? 100, muted: msg.muted ?? false });
+    case 'VOLUME_CHANGED': {
+      const volUpdate: Partial<PlayerState> = {};
+      if (msg.volume !== undefined) volUpdate.volume = msg.volume;
+      if (msg.muted !== undefined) volUpdate.muted = msg.muted;
+      notify(volUpdate);
       break;
+    }
     case 'REPEAT_CHANGED':
       notify({ repeat: msg.repeat ?? 'NONE' });
       break;
