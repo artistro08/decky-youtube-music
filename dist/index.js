@@ -454,17 +454,15 @@ const TabsContainer = () => {
         }
         setHeight(window.innerHeight - containerRect.top);
     }, []);
-    // Zero tabpanel padding — the Decky Tabs component injects 2.8vw left/right
-    // padding on the [role="tabpanel"] element. Run on mount and on every tab
-    // switch because a new tabpanel element is created for each active tab.
+    // Zero the Decky Tabs content scroll container padding.
+    // The _TabContentsScroll element has 2.8vw left/right padding injected by
+    // Decky's CSS. It renders outside our containerRef DOM subtree (portal), so
+    // we query the document directly using its stable class name fragment.
+    // Runs on mount and on every tab switch in case the element is recreated.
     SP_REACT.useEffect(() => {
-        if (!containerRef.current)
-            return;
-        containerRef.current.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
-            if (panel instanceof HTMLElement) {
-                panel.style.paddingLeft = '0';
-                panel.style.paddingRight = '0';
-            }
+        document.querySelectorAll('[class*="TabContentsScroll"]').forEach((el) => {
+            el.style.paddingLeft = '0';
+            el.style.paddingRight = '0';
         });
     }, [activeTab]);
     return (SP_JSX.jsx("div", { ref: containerRef, style: { height }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [
