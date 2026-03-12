@@ -92,10 +92,43 @@ const PaddedSlider = (props: SliderFieldProps) => {
 export const PlayerView = () => {
   const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
 
-  // Local state so the slider responds immediately without waiting for the
-  // WebSocket state update, which would snap the value back and confuse d-pad direction.
+  // Local display state for the volume slider.
+  // Problems solved:
+  //   1. Touch drag fires onChange rapidly; multiple API calls come back via WebSocket
+  //      out of order and snap the slider to stale values mid-drag.
+  //   2. D-pad presses jump because WebSocket resets displayVolume between presses.
+  //   3. Hard to exceed low values because server response overrides before next press.
+  //
+  // Fix: block WebSocket syncs while the user is adjusting (+ 500ms cooldown after),
+  // and debounce the API call so only the final value in a burst is sent.
   const [displayVolume, setDisplayVolume] = useState(volume);
-  useEffect(() => { setDisplayVolume(volume); }, [volume]);
+  const adjustingRef = useRef(false);
+  const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync from WebSocket only when the user is not actively adjusting.
+  useEffect(() => {
+    if (!adjustingRef.current) setDisplayVolume(volume);
+  }, [volume]);
+
+  // Cleanup timers on unmount.
+  useEffect(() => () => {
+    if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
+
+  const handleVolumeChange = (val: number) => {
+    adjustingRef.current = true;
+    setDisplayVolume(val);
+
+    // Keep blocking WebSocket sync for 500ms after the last adjustment.
+    if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
+    cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 500);
+
+    // Debounce the API call — only fire after 300ms of no further changes.
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => { void setVolume(val); }, 300);
+  };
 
   const albumArt = song?.albumArt;
   const title = song?.title ?? 'Nothing playing';
@@ -183,7 +216,7 @@ export const PlayerView = () => {
           min={0}
           max={100}
           step={1}
-          onChange={(val) => { setDisplayVolume(val); void setVolume(val); }}
+          onChange={handleVolumeChange}
           showValue={false}
         />
         <PaddedButton onClick={() => { void toggleMute(); }}>
