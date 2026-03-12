@@ -6,10 +6,10 @@ interface SectionProps {
 }
 
 export const Section = ({ title, children }: SectionProps) => (
-  <div style={{ padding: '0 12px' }}>
+  <div>
     {title && (
       <div style={{
-        padding: '12px 0 4px',
+        padding: '12px 12px 4px',
         fontSize: '11px',
         fontWeight: 'bold',
         textTransform: 'uppercase' as const,
