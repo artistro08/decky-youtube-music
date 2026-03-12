@@ -39,8 +39,10 @@ export const QueueView = () => {
   if (loading) {
     return (
       <Section>
-        <div style={{ padding: '16px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
-          Loading queue...
+        <div style={{ padding: '0 12px' }}>
+          <div style={{ padding: '16px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+            Loading queue...
+          </div>
         </div>
       </Section>
     );
@@ -49,8 +51,10 @@ export const QueueView = () => {
   if (queue.length === 0) {
     return (
       <Section title="Queue">
-        <div style={{ padding: '8px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
-          Queue is empty
+        <div style={{ padding: '0 12px' }}>
+          <div style={{ padding: '8px 0', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+            Queue is empty
+          </div>
         </div>
       </Section>
     );
@@ -58,7 +62,9 @@ export const QueueView = () => {
 
   return (
     <Section title="Queue">
-      <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
+      <div style={{ padding: '0 12px' }}>
+        <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
+      </div>
 
       {queue.map((item, index) => {
         const r = getRenderer(item);
