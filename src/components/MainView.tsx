@@ -1,17 +1,23 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
+import { useEffect, useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
+  clearQueue,
   dislike,
+  getQueue,
   like,
   next,
   previous,
+  removeFromQueue,
   seekTo,
+  setQueueIndex,
   setVolume,
   shuffle,
   switchRepeat,
   toggleMute,
   togglePlay,
 } from '../services/apiClient';
+import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
 
 const REPEAT_LABELS: Record<string, string> = {
@@ -41,8 +47,42 @@ const rowBtn: React.CSSProperties = {
   flex: 1,
 };
 
-export const PlayerView = () => {
+const getRenderer = (item: QueueItem) =>
+  item.playlistPanelVideoRenderer ??
+  item.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer;
+
+export const MainView = () => {
   const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
+
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queueLoading, setQueueLoading] = useState(true);
+
+  const loadQueue = async (silent = false) => {
+    if (!silent) setQueueLoading(true);
+    try {
+      const data: QueueResponse | null = await getQueue();
+      setQueue(data?.items ?? []);
+    } finally {
+      if (!silent) setQueueLoading(false);
+    }
+  };
+
+  useEffect(() => { void loadQueue(); }, []);
+
+  const handleJump = async (index: number) => {
+    await setQueueIndex(index);
+    void loadQueue(true);
+  };
+
+  const handleRemove = async (index: number) => {
+    await removeFromQueue(index);
+    void loadQueue(true);
+  };
+
+  const handleClear = async () => {
+    await clearQueue();
+    setQueue([]);
+  };
 
   const albumArt = song?.albumArt;
   const title = song?.title ?? 'Nothing playing';
@@ -148,6 +188,86 @@ export const PlayerView = () => {
         <ButtonItem onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
           {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
         </ButtonItem>
+      </Section>
+
+      {/* Queue */}
+      <Section title="Queue">
+        {queueLoading ? (
+          <div style={{ padding: '8px 16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+            Loading queue...
+          </div>
+        ) : queue.length === 0 ? (
+          <div style={{ padding: '8px 16px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
+            Queue is empty
+          </div>
+        ) : (
+          <>
+            <ButtonItem onClick={() => { void handleClear(); }}>Clear Queue</ButtonItem>
+            {queue.map((item, index) => {
+              const r = getRenderer(item);
+              const trackTitle = r?.title?.runs?.[0]?.text ?? 'Unknown';
+              const trackArtist = r?.shortBylineText?.runs?.[0]?.text ?? '';
+              const isSelected = r?.selected ?? false;
+
+              if (DialogButton) {
+                return (
+                  <Focusable
+                    key={index}
+                    style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px' }}
+                    flow-children="horizontal"
+                  >
+                    <DialogButton
+                      style={{
+                        flex: 1,
+                        textAlign: 'left',
+                        height: 'auto',
+                        minHeight: '40px',
+                        padding: '4px 8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                      }}
+                      onClick={() => { void handleJump(index); }}
+                    >
+                      <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }}>{trackTitle}</div>
+                      {trackArtist && (
+                        <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
+                          {trackArtist}
+                        </div>
+                      )}
+                    </DialogButton>
+                    <DialogButton
+                      onClick={() => { void handleRemove(index); }}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        minWidth: '0',
+                        padding: '0',
+                        marginLeft: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      ✕
+                    </DialogButton>
+                  </Focusable>
+                );
+              }
+
+              return (
+                <ButtonItem
+                  key={index}
+                  onClick={() => { void handleJump(index); }}
+                >
+                  <span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>{trackTitle}</span>
+                  {trackArtist && ` — ${trackArtist}`}
+                </ButtonItem>
+              );
+            })}
+          </>
+        )}
       </Section>
     </>
   );
