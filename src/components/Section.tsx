@@ -2,14 +2,15 @@ import type { ReactNode } from 'react';
 
 interface SectionProps {
   title?: string;
+  noPull?: boolean;
   children: ReactNode;
 }
 
-export const Section = ({ title, children }: SectionProps) => (
-  <div style={{ padding: '0 12px' }}>
+export const Section = ({ title, noPull, children }: SectionProps) => (
+  <div style={noPull ? undefined : { margin: '0 -10px' }}>
     {title && (
       <div style={{
-        padding: '12px 0 4px',
+        padding: '12px 10px 4px',
         fontSize: '11px',
         fontWeight: 'bold',
         textTransform: 'uppercase' as const,

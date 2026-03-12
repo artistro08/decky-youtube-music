@@ -55,7 +55,7 @@ const PaddedSlider = (props: SliderFieldProps) => {
     });
   }, []);
   return (
-    <div ref={ref} style={{ padding: '0 12px' }}>
+    <div ref={ref} style={{ padding: '0 10px' }}>
       <SliderField {...props} />
     </div>
   );
@@ -110,7 +110,7 @@ export const PlayerView = () => {
       </Section>
 
       {/* Prev / Play / Next */}
-      <Section title="Controls">
+      <Section title="Controls" noPull>
         {DialogButton ? (
           <>
             <Focusable
