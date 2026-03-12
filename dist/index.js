@@ -422,11 +422,11 @@ const TabsContainer = () => {
     const [activeTab, setActiveTab] = SP_REACT.useState('player');
     const containerRef = SP_REACT.useRef(null);
     const [height, setHeight] = SP_REACT.useState(500);
+    // Height measurement — run once on mount.
     SP_REACT.useEffect(() => {
         if (!containerRef.current)
             return;
         const containerRect = containerRef.current.getBoundingClientRect();
-        // Walk up to find the scroll container for height measurement.
         let el = containerRef.current.parentElement;
         while (el && el !== document.documentElement) {
             const style = window.getComputedStyle(el);
@@ -434,30 +434,25 @@ const TabsContainer = () => {
             if (oy === 'scroll' || oy === 'auto' || oy === 'overlay') {
                 const elRect = el.getBoundingClientRect();
                 setHeight(elRect.bottom - containerRect.top);
-                break;
+                return;
             }
             el = el.parentElement;
         }
-        // Fallback height if no scrollable ancestor found
-        if (!el || el === document.documentElement) {
-            setHeight(window.innerHeight - containerRect.top);
-        }
-        // Walk up to find the Tabs content column and zero its padding.
-        // Decky's TabContentColumn injects left/right padding that creates
-        // an unwanted edge gap. We zero it here to allow full-width content.
-        let padEl = containerRef.current.parentElement;
-        while (padEl && padEl !== document.documentElement) {
-            const style = window.getComputedStyle(padEl);
-            const pl = parseFloat(style.paddingLeft);
-            const pr = parseFloat(style.paddingRight);
-            if (pl > 0 || pr > 0) {
-                padEl.style.paddingLeft = '0px';
-                padEl.style.paddingRight = '0px';
-                break;
-            }
-            padEl = padEl.parentElement;
-        }
+        setHeight(window.innerHeight - containerRect.top);
     }, []);
+    // Zero tabpanel padding — the Decky Tabs component injects 2.8vw left/right
+    // padding on the [role="tabpanel"] element. Run on mount and on every tab
+    // switch because a new tabpanel element is created for each active tab.
+    SP_REACT.useEffect(() => {
+        if (!containerRef.current)
+            return;
+        containerRef.current.querySelectorAll('[role="tabpanel"]').forEach((panel) => {
+            if (panel instanceof HTMLElement) {
+                panel.style.paddingLeft = '0';
+                panel.style.paddingRight = '0';
+            }
+        });
+    }, [activeTab]);
     return (SP_JSX.jsx("div", { ref: containerRef, style: { height }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [
                 { id: 'player', title: 'Player', content: SP_JSX.jsx(PlayerView, {}) },
                 { id: 'queue', title: 'Queue', content: SP_JSX.jsx(QueueView, {}) },
