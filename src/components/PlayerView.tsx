@@ -49,13 +49,18 @@ const PaddedSlider = (props: SliderFieldProps) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
+    const firstChild = ref.current.firstElementChild as HTMLElement | null;
+    if (firstChild) {
+      firstChild.style.paddingLeft = '10px';
+      firstChild.style.paddingRight = '10px';
+    }
     ref.current.querySelectorAll<HTMLElement>('*').forEach((el) => {
       if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
         el.style.minWidth = '0';
     });
   }, []);
   return (
-    <div ref={ref} style={{ padding: '0 10px' }}>
+    <div ref={ref}>
       <SliderField {...props} />
     </div>
   );
