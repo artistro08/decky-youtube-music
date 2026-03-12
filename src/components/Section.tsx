@@ -10,7 +10,7 @@ export const Section = ({ title, noPull, children }: SectionProps) => (
   <div style={noPull ? undefined : { margin: '0 -12px' }}>
     {title && (
       <div style={{
-        padding: '12px 12px 4px',
+        padding: noPull ? '12px 0 4px' : '12px 12px 4px',
         fontSize: '11px',
         fontWeight: 'bold',
         textTransform: 'uppercase' as const,
