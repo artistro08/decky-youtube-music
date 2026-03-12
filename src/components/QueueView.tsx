@@ -82,7 +82,7 @@ export const QueueView = () => {
           return (
             <Focusable
               key={index}
-              style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px' }}
+              style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '10px', paddingRight: '10px' }}
               flow-children="horizontal"
             >
               <DialogButton
