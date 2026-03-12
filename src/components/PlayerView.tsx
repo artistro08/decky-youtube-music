@@ -54,38 +54,44 @@ export const PlayerView = () => {
       {/* Album art */}
       {albumArt && (
         <Section>
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
-            <img
-              src={albumArt}
-              alt="Album art"
-              style={{ width: '100%', maxWidth: '180px', borderRadius: '8px' }}
-            />
+          <div style={{ padding: '0 12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+              <img
+                src={albumArt}
+                alt="Album art"
+                style={{ width: '100%', maxWidth: '180px', borderRadius: '8px' }}
+              />
+            </div>
           </div>
         </Section>
       )}
 
       {/* Track info */}
       <Section>
-        <div style={{ textAlign: 'center', padding: '8px 0' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {title}
-          </div>
-          {artist && (
-            <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
-              {artist}
+        <div style={{ padding: '0 12px' }}>
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {title}
             </div>
-          )}
+            {artist && (
+              <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
+                {artist}
+              </div>
+            )}
+          </div>
         </div>
         {duration > 0 && (
-          <SliderField
-            label=""
-            value={position}
-            min={0}
-            max={duration}
-            step={1}
-            onChange={(val) => { void seekTo(val); }}
-            showValue={false}
-          />
+          <div style={{ padding: '0 12px' }}>
+            <SliderField
+              label=""
+              value={position}
+              min={0}
+              max={duration}
+              step={1}
+              onChange={(val) => { void seekTo(val); }}
+              showValue={false}
+            />
+          </div>
         )}
       </Section>
 
@@ -124,30 +130,38 @@ export const PlayerView = () => {
 
       {/* Volume */}
       <Section title="Volume">
-        <SliderField
-          label={muted ? 'Muted' : `${Math.round(volume)}%`}
-          value={muted ? 0 : volume}
-          min={0}
-          max={100}
-          step={1}
-          onChange={(val) => { void setVolume(val); }}
-          showValue={false}
-        />
-        <ButtonItem onClick={() => { void toggleMute(); }}>
-          {muted ? '🔇 Unmute' : '🔊 Mute'}
-        </ButtonItem>
+        <div style={{ padding: '0 12px' }}>
+          <SliderField
+            label={muted ? 'Muted' : `${Math.round(volume)}%`}
+            value={muted ? 0 : volume}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(val) => { void setVolume(val); }}
+            showValue={false}
+          />
+        </div>
+        <div style={{ padding: '0 12px' }}>
+          <ButtonItem onClick={() => { void toggleMute(); }}>
+            {muted ? '🔇 Unmute' : '🔊 Mute'}
+          </ButtonItem>
+        </div>
       </Section>
 
       {/* Playback options */}
       <Section title="Playback">
-        <ToggleField
-          label="Shuffle"
-          checked={isShuffled}
-          onChange={() => { void shuffle(); }}
-        />
-        <ButtonItem onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
-          {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
-        </ButtonItem>
+        <div style={{ padding: '0 12px' }}>
+          <ToggleField
+            label="Shuffle"
+            checked={isShuffled}
+            onChange={() => { void shuffle(); }}
+          />
+        </div>
+        <div style={{ padding: '0 12px' }}>
+          <ButtonItem onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
+            {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
+          </ButtonItem>
+        </div>
       </Section>
     </>
   );
