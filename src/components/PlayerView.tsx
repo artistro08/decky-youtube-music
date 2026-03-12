@@ -1,6 +1,6 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
 import type { SliderFieldProps } from '@decky/ui';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -92,6 +92,11 @@ const PaddedSlider = (props: SliderFieldProps) => {
 export const PlayerView = () => {
   const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position } = usePlayer();
 
+  // Local state so the slider responds immediately without waiting for the
+  // WebSocket state update, which would snap the value back and confuse d-pad direction.
+  const [displayVolume, setDisplayVolume] = useState(volume);
+  useEffect(() => { setDisplayVolume(volume); }, [volume]);
+
   const albumArt = song?.albumArt;
   const title = song?.title ?? 'Nothing playing';
   const artist = song?.artist ?? '';
@@ -173,12 +178,12 @@ export const PlayerView = () => {
       {/* Volume */}
       <Section title="Volume">
         <PaddedSlider
-          label={muted ? 'Muted' : `${Math.round(volume)}%`}
-          value={muted ? 0 : volume}
+          label={muted ? 'Muted' : `${Math.round(displayVolume)}%`}
+          value={muted ? 0 : displayVolume}
           min={0}
           max={100}
           step={1}
-          onChange={(val) => { void setVolume(val); }}
+          onChange={(val) => { setDisplayVolume(val); void setVolume(val); }}
           showValue={false}
         />
         <PaddedButton onClick={() => { void toggleMute(); }}>
