@@ -5,10 +5,6 @@ import { FaVolumeUp } from 'react-icons/fa';
 import { getVolume, setVolume } from '../services/apiClient';
 import { usePlayer } from '../context/PlayerContext';
 
-// After the user moves the slider, suppress re-fetch for this long
-// so the slider doesn't jump while the API call is in flight.
-const USER_ADJUST_GRACE_MS = 1500;
-
 // Module-level cache — survives tab switches (component remounts) so the
 // slider shows the last known value immediately instead of flashing to 0.
 let cachedVolume: number | null = null;
@@ -39,15 +35,19 @@ export const VolumeSlider = () => {
   // Initialise from cache so remounts show the last known value instantly.
   const [displayVolume, setDisplayVolume] = useState<number | null>(cachedVolume);
 
-  const userAdjustingRef = useRef(false);
-  const userAdjustTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const apiDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fetch the real volume from YTM via HTTP whenever we (re)connect.
-  // HTTP GET /volume is the only reliable source — WS volume events can carry
-  // stale or differently-scaled values and must not drive the display directly.
+  // Fetch from YTM only when we genuinely have no cached value (first connect
+  // or after a real disconnect cleared the cache). On remounts while already
+  // connected, cachedVolume is non-null so we skip and preserve the known value.
   useEffect(() => {
-    if (!connected) return;
+    if (!connected) {
+      // Real disconnect — invalidate cache so the next reconnect fetches fresh.
+      cachedVolume = null;
+      setDisplayVolume(null);
+      return;
+    }
+    if (cachedVolume !== null) return;
     void getVolume().then((res) => {
       if (res !== null) {
         cachedVolume = res.state;
@@ -56,10 +56,9 @@ export const VolumeSlider = () => {
     });
   }, [connected]);
 
-  // Clear pending timers on unmount to avoid stale callbacks.
+  // Clear pending timer on unmount to avoid stale callbacks.
   useEffect(() => {
     return () => {
-      if (userAdjustTimerRef.current) clearTimeout(userAdjustTimerRef.current);
       if (apiDebounceRef.current) clearTimeout(apiDebounceRef.current);
     };
   }, []);
@@ -67,20 +66,6 @@ export const VolumeSlider = () => {
   const handleChange = useCallback((val: number) => {
     setDisplayVolume(val);
     cachedVolume = val; // keep cache in sync so remounts reflect the drag
-
-    // Suppress the post-drag re-fetch while the user is still moving.
-    userAdjustingRef.current = true;
-    if (userAdjustTimerRef.current) clearTimeout(userAdjustTimerRef.current);
-    userAdjustTimerRef.current = setTimeout(() => {
-      userAdjustingRef.current = false;
-      // Confirm the settled value via HTTP once the grace period expires.
-      void getVolume().then((res) => {
-        if (res !== null) {
-          cachedVolume = res.state;
-          setDisplayVolume(res.state);
-        }
-      });
-    }, USER_ADJUST_GRACE_MS);
 
     // Debounce the actual API call.
     if (apiDebounceRef.current) clearTimeout(apiDebounceRef.current);

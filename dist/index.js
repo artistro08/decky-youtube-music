@@ -81,18 +81,8 @@ function IconBase(props) {
 // THIS FILE IS AUTO GENERATED
 function FaVolumeUp (props) {
   return GenIcon({"attr":{"viewBox":"0 0 576 512"},"child":[{"tag":"path","attr":{"d":"M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81-11.61 6.41-15.84 21-9.45 32.61 6.43 11.66 21.05 15.8 32.61 9.45 28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"},"child":[]}]})(props);
-}function FaThumbsUp (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M104 224H24c-13.255 0-24 10.745-24 24v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V248c0-13.255-10.745-24-24-24zM64 472c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zM384 81.452c0 42.416-25.97 66.208-33.277 94.548h101.723c33.397 0 59.397 27.746 59.553 58.098.084 17.938-7.546 37.249-19.439 49.197l-.11.11c9.836 23.337 8.237 56.037-9.308 79.469 8.681 25.895-.069 57.704-16.382 74.757 4.298 17.598 2.244 32.575-6.148 44.632C440.202 511.587 389.616 512 346.839 512l-2.845-.001c-48.287-.017-87.806-17.598-119.56-31.725-15.957-7.099-36.821-15.887-52.651-16.178-6.54-.12-11.783-5.457-11.783-11.998v-213.77c0-3.2 1.282-6.271 3.558-8.521 39.614-39.144 56.648-80.587 89.117-113.111 14.804-14.832 20.188-37.236 25.393-58.902C282.515 39.293 291.817 0 312 0c24 0 72 8 72 81.452z"},"child":[]}]})(props);
-}function FaThumbsDown (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M0 56v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H24C10.745 32 0 42.745 0 56zm40 200c0-13.255 10.745-24 24-24s24 10.745 24 24-10.745 24-24 24-24-10.745-24-24zm272 256c-20.183 0-29.485-39.293-33.931-57.795-5.206-21.666-10.589-44.07-25.393-58.902-32.469-32.524-49.503-73.967-89.117-113.111a11.98 11.98 0 0 1-3.558-8.521V59.901c0-6.541 5.243-11.878 11.783-11.998 15.831-.29 36.694-9.079 52.651-16.178C256.189 17.598 295.709.017 343.995 0h2.844c42.777 0 93.363.413 113.774 29.737 8.392 12.057 10.446 27.034 6.148 44.632 16.312 17.053 25.063 48.863 16.382 74.757 17.544 23.432 19.143 56.132 9.308 79.469l.11.11c11.893 11.949 19.523 31.259 19.439 49.197-.156 30.352-26.157 58.098-59.553 58.098H350.723C358.03 364.34 384 388.132 384 430.548 384 504 336 512 312 512z"},"child":[]}]})(props);
-}function FaStepForward (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M384 44v424c0 6.6-5.4 12-12 12h-48c-6.6 0-12-5.4-12-12V291.6l-195.5 181C95.9 489.7 64 475.4 64 448V64c0-27.4 31.9-41.7 52.5-24.6L312 219.3V44c0-6.6 5.4-12 12-12h48c6.6 0 12 5.4 12 12z"},"child":[]}]})(props);
-}function FaStepBackward (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M64 468V44c0-6.6 5.4-12 12-12h48c6.6 0 12 5.4 12 12v176.4l195.5-181C352.1 22.3 384 36.6 384 64v384c0 27.4-31.9 41.7-52.5 24.6L136 292.7V468c0 6.6-5.4 12-12 12H76c-6.6 0-12-5.4-12-12z"},"child":[]}]})(props);
 }function FaRandom (props) {
   return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M504.971 359.029c9.373 9.373 9.373 24.569 0 33.941l-80 79.984c-15.01 15.01-40.971 4.49-40.971-16.971V416h-58.785a12.004 12.004 0 0 1-8.773-3.812l-70.556-75.596 53.333-57.143L352 336h32v-39.981c0-21.438 25.943-31.998 40.971-16.971l80 79.981zM12 176h84l52.781 56.551 53.333-57.143-70.556-75.596A11.999 11.999 0 0 0 122.785 96H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12zm372 0v39.984c0 21.46 25.961 31.98 40.971 16.971l80-79.984c9.373-9.373 9.373-24.569 0-33.941l-80-79.981C409.943 24.021 384 34.582 384 56.019V96h-58.785a12.004 12.004 0 0 0-8.773 3.812L96 336H12c-6.627 0-12 5.373-12 12v56c0 6.627 5.373 12 12 12h110.785c3.326 0 6.503-1.381 8.773-3.812L352 176h32z"},"child":[]}]})(props);
-}function FaPlay (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"},"child":[]}]})(props);
 }function FaPause (props) {
   return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M144 479H48c-26.5 0-48-21.5-48-48V79c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48v352c0 26.5-21.5 48-48 48zm304-48V79c0-26.5-21.5-48-48-48h-96c-26.5 0-48 21.5-48 48v352c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48z"},"child":[]}]})(props);
 }function FaMusic (props) {
@@ -176,8 +166,6 @@ const previous = () => post('/previous');
 const setVolume = (volume) => post('/volume', { volume });
 const shuffle = () => post('/shuffle');
 const switchRepeat = (iteration) => post('/switch-repeat', { iteration });
-const like = () => post('/like');
-const dislike = () => post('/dislike');
 // Song & state
 const getSongInfo = async () => {
     const info = await get('/song');
@@ -317,6 +305,25 @@ const defaultState = {
 const reducer = (state, action) => {
     if (action.type === 'UPDATE')
         return { ...state, ...action.payload };
+    if (action.type === 'SUPPLEMENT_SONG') {
+        const existing = state.song;
+        // No existing song — use HTTP data as-is.
+        if (!existing)
+            return { ...state, song: action.payload };
+        // Stale response for a different video (race condition) — ignore.
+        if (existing.videoId !== action.payload.videoId)
+            return state;
+        // Same song — merge: HTTP fills in fields WS omitted (e.g. albumArt),
+        // but does NOT overwrite fields WS already provided.
+        const merged = { ...existing };
+        Object.keys(action.payload).forEach((k) => {
+            const v = action.payload[k];
+            if (v !== undefined && merged[k] === undefined) {
+                merged[k] = v;
+            }
+        });
+        return { ...state, song: merged };
+    }
     return state;
 };
 const PlayerContext = SP_REACT.createContext(defaultState);
@@ -340,7 +347,7 @@ const PlayerProvider = ({ children }) => {
         let cancelled = false;
         void getSongInfo().then((info) => {
             if (!cancelled && info)
-                dispatch({ type: 'UPDATE', payload: { song: info } });
+                dispatch({ type: 'SUPPLEMENT_SONG', payload: info });
         });
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps -- dispatch is stable; intentionally omit to avoid extra fetches
@@ -373,15 +380,21 @@ const AuthTokenView = () => {
 };
 
 // THIS FILE IS AUTO GENERATED
+function IoPlay (props) {
+  return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M133 440a35.37 35.37 0 0 1-17.5-4.67c-12-6.8-19.46-20-19.46-34.33V111c0-14.37 7.46-27.53 19.46-34.33a35.13 35.13 0 0 1 35.77.45l247.85 148.36a36 36 0 0 1 0 61l-247.89 148.4A35.5 35.5 0 0 1 133 440z"},"child":[]}]})(props);
+}function IoPlaySkipForward (props) {
+  return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M400 64a16 16 0 0 0-16 16v136.43L151.23 77.11a35.13 35.13 0 0 0-35.77-.44C103.46 83.47 96 96.63 96 111v290c0 14.37 7.46 27.53 19.46 34.33a35.14 35.14 0 0 0 35.77-.45L384 295.57V432a16 16 0 0 0 32 0V80a16 16 0 0 0-16-16z"},"child":[]}]})(props);
+}function IoPlaySkipBack (props) {
+  return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M112 64a16 16 0 0 1 16 16v136.43L360.77 77.11a35.13 35.13 0 0 1 35.77-.44c12 6.8 19.46 20 19.46 34.33v290c0 14.37-7.46 27.53-19.46 34.33a35.14 35.14 0 0 1-35.77-.45L128 295.57V432a16 16 0 0 1-32 0V80a16 16 0 0 1 16-16z"},"child":[]}]})(props);
+}
+
+// THIS FILE IS AUTO GENERATED
 function MdRepeatOne (props) {
   return GenIcon({"attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"fill":"none","d":"M0 0h24v24H0z"},"child":[]},{"tag":"path","attr":{"d":"M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zm-4-2V9h-1l-2 1v1h1.5v4H13z"},"child":[]}]})(props);
 }function MdRepeat (props) {
   return GenIcon({"attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"fill":"none","d":"M0 0h24v24H0z"},"child":[]},{"tag":"path","attr":{"d":"M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"},"child":[]}]})(props);
 }
 
-// After the user moves the slider, suppress re-fetch for this long
-// so the slider doesn't jump while the API call is in flight.
-const USER_ADJUST_GRACE_MS = 1500;
 // Module-level cache — survives tab switches (component remounts) so the
 // slider shows the last known value immediately instead of flashing to 0.
 let cachedVolume = null;
@@ -406,14 +419,18 @@ const VolumeSlider = () => {
     const { connected } = usePlayer();
     // Initialise from cache so remounts show the last known value instantly.
     const [displayVolume, setDisplayVolume] = SP_REACT.useState(cachedVolume);
-    const userAdjustingRef = SP_REACT.useRef(false);
-    const userAdjustTimerRef = SP_REACT.useRef(null);
     const apiDebounceRef = SP_REACT.useRef(null);
-    // Fetch the real volume from YTM via HTTP whenever we (re)connect.
-    // HTTP GET /volume is the only reliable source — WS volume events can carry
-    // stale or differently-scaled values and must not drive the display directly.
+    // Fetch from YTM only when we genuinely have no cached value (first connect
+    // or after a real disconnect cleared the cache). On remounts while already
+    // connected, cachedVolume is non-null so we skip and preserve the known value.
     SP_REACT.useEffect(() => {
-        if (!connected)
+        if (!connected) {
+            // Real disconnect — invalidate cache so the next reconnect fetches fresh.
+            cachedVolume = null;
+            setDisplayVolume(null);
+            return;
+        }
+        if (cachedVolume !== null)
             return;
         void getVolume().then((res) => {
             if (res !== null) {
@@ -422,11 +439,9 @@ const VolumeSlider = () => {
             }
         });
     }, [connected]);
-    // Clear pending timers on unmount to avoid stale callbacks.
+    // Clear pending timer on unmount to avoid stale callbacks.
     SP_REACT.useEffect(() => {
         return () => {
-            if (userAdjustTimerRef.current)
-                clearTimeout(userAdjustTimerRef.current);
             if (apiDebounceRef.current)
                 clearTimeout(apiDebounceRef.current);
         };
@@ -434,20 +449,6 @@ const VolumeSlider = () => {
     const handleChange = SP_REACT.useCallback((val) => {
         setDisplayVolume(val);
         cachedVolume = val; // keep cache in sync so remounts reflect the drag
-        // Suppress the post-drag re-fetch while the user is still moving.
-        userAdjustingRef.current = true;
-        if (userAdjustTimerRef.current)
-            clearTimeout(userAdjustTimerRef.current);
-        userAdjustTimerRef.current = setTimeout(() => {
-            userAdjustingRef.current = false;
-            // Confirm the settled value via HTTP once the grace period expires.
-            void getVolume().then((res) => {
-                if (res !== null) {
-                    cachedVolume = res.state;
-                    setDisplayVolume(res.state);
-                }
-            });
-        }, USER_ADJUST_GRACE_MS);
         // Debounce the actual API call.
         if (apiDebounceRef.current)
             clearTimeout(apiDebounceRef.current);
@@ -469,8 +470,7 @@ const REPEAT_LABELS = {
     ALL: 'All',
     ONE: 'One',
 };
-const rowBtnBase = {
-    height: '30px',
+const btnBase = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -479,9 +479,9 @@ const rowBtnBase = {
     padding: '0 8px',
     marginLeft: '0',
 };
-const rowBtnFirst = { ...rowBtnBase, borderRadius: '4px 0 0 4px' };
-const rowBtnMid = { ...rowBtnBase, borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
-const rowBtnLast = { ...rowBtnBase, borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const transBtnFirst = { ...btnBase, height: '35px', borderRadius: '4px 0 0 4px' };
+const transBtnMid = { ...btnBase, height: '35px', borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const transBtnLast = { ...btnBase, height: '35px', borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
 // Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el) => {
@@ -507,7 +507,7 @@ const PlayerView = () => {
                                 background: 'rgba(255,255,255,0.08)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--gpSystemLighterGrey)',
-                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(VolumeSlider, {}) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 14 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '19px', paddingRight: '19px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
+                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: transBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(IoPlaySkipBack, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(IoPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(IoPlaySkipForward, {}) })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(IoPlaySkipBack, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(IoPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(IoPlaySkipForward, {}), " Next"] })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(VolumeSlider, {}) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 14 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '19px', paddingRight: '19px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
 };
 
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
@@ -526,7 +526,7 @@ const QueueView = () => {
     SP_REACT.useEffect(() => { void loadQueue(); }, []);
     SP_REACT.useEffect(() => {
         const el = document.createElement('style');
-        el.textContent = '.yt-queue-active:not(:focus):not(:focus-within) { background: rgba(255,255,255,0) !important; }';
+        el.textContent = `.yt-queue-active:not(:focus):not(:focus-within) { background: rgba(255,255,255,0) !important; }`;
         document.head.appendChild(el);
         return () => el.remove();
     }, []);
@@ -560,7 +560,7 @@ const QueueView = () => {
                                 flexDirection: 'column',
                                 justifyContent: 'center',
                                 borderRadius: '0',
-                            }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
+                            }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsxs("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center' }, children: [isSelected && SP_JSX.jsx(IoPlay, { size: 11, style: { marginRight: '6px', flexShrink: 0 } }), SP_JSX.jsx("span", { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title })] }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
                                 width: '36px',
                                 minWidth: '0',
                                 padding: '0',
@@ -578,7 +578,7 @@ const QueueView = () => {
         }) }));
 };
 
-const TabsContainer = () => {
+const TabsContainer = SP_REACT.memo(() => {
     const [activeTab, setActiveTab] = SP_REACT.useState('player');
     const containerRef = SP_REACT.useRef(null);
     const [height, setHeight] = SP_REACT.useState(500);
@@ -645,11 +645,14 @@ const TabsContainer = () => {
         document.head.appendChild(el);
         return () => el.remove();
     }, []);
-    return (SP_JSX.jsx("div", { id: "ytm-container", ref: containerRef, style: { height, overflow: 'hidden' }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [
-                { id: 'player', title: 'Player', content: SP_JSX.jsx(PlayerView, {}) },
-                { id: 'queue', title: 'Queue', content: SP_JSX.jsx(QueueView, {}) },
-            ] }) }));
-};
+    // Memoize tab content so @decky/ui's Tabs sees a stable array reference
+    // and does not unmount/remount content on every re-render.
+    const tabItems = SP_REACT.useMemo(() => [
+        { id: 'player', title: 'Player', content: SP_JSX.jsx(PlayerView, {}) },
+        { id: 'queue', title: 'Queue', content: SP_JSX.jsx(QueueView, {}) },
+    ], []);
+    return (SP_JSX.jsx("div", { id: "ytm-container", ref: containerRef, style: { height, overflow: 'hidden' }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: tabItems }) }));
+});
 const PluginContent = () => {
     const { connected, authRequired } = usePlayer();
     const [activeTab, setActiveTab] = SP_REACT.useState('player');

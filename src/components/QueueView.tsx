@@ -1,7 +1,7 @@
 import { DialogButton, Field, Focusable } from '@decky/ui';
 import { useEffect, useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
-import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
+import { IoPlay } from 'react-icons/io5';
+import { getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
 
@@ -22,6 +22,13 @@ export const QueueView = () => {
 
   useEffect(() => { void loadQueue(); }, []);
 
+  useEffect(() => {
+    const el = document.createElement('style');
+    el.textContent = `.yt-queue-active:not(:focus):not(:focus-within) { background: rgba(255,255,255,0) !important; }`;
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, []);
+
   const handleJump = async (index: number) => {
     await setQueueIndex(index);
     void loadQueue(true);
@@ -30,11 +37,6 @@ export const QueueView = () => {
   const handleRemove = async (index: number) => {
     await removeFromQueue(index);
     void loadQueue(true);
-  };
-
-  const handleClear = async () => {
-    await clearQueue();
-    setQueue([]);
   };
 
   if (loading) {
@@ -59,15 +61,6 @@ export const QueueView = () => {
 
   return (
     <Section>
-      <Focusable>
-        <DialogButton
-          style={{ height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }}
-          onClick={() => { void handleClear(); }}
-        >
-          <FaTrash /> Clear Queue
-        </DialogButton>
-      </Focusable>
-
       {queue.map((item, index) => {
         const r = getRenderer(item);
         const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
@@ -82,12 +75,13 @@ export const QueueView = () => {
               flow-children="horizontal"
             >
               <DialogButton
+                className={isSelected ? 'yt-queue-active' : undefined}
                 style={{
                   flex: 1,
                   textAlign: 'left',
                   height: 'auto',
                   minHeight: '44px',
-                  padding: '4px 16px',
+                  padding: '10px 19px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
@@ -95,7 +89,10 @@ export const QueueView = () => {
                 }}
                 onClick={() => { void handleJump(index); }}
               >
-                <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }}>{title}</div>
+                <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                  {isSelected && <IoPlay size={11} style={{ marginRight: '6px', flexShrink: 0 }} />}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
+                </div>
                 {artist && (
                   <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
                     {artist}
@@ -103,6 +100,7 @@ export const QueueView = () => {
                 )}
               </DialogButton>
               <DialogButton
+                className={isSelected ? 'yt-queue-active' : undefined}
                 onClick={() => { void handleRemove(index); }}
                 style={{
                   width: '36px',

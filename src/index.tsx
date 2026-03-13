@@ -1,6 +1,6 @@
 import { ButtonItem, Tabs, staticClasses } from '@decky/ui';
 import { definePlugin } from '@decky/api';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
 
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
@@ -10,7 +10,7 @@ import { PlayerView } from './components/PlayerView';
 import { QueueView } from './components/QueueView';
 import { Section } from './components/Section';
 
-const TabsContainer = () => {
+const TabsContainer = memo(() => {
   const [activeTab, setActiveTab] = useState<string>('player');
   const containerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number>(500);
@@ -80,19 +80,23 @@ const TabsContainer = () => {
     return () => el.remove();
   }, []);
 
+  // Memoize tab content so @decky/ui's Tabs sees a stable array reference
+  // and does not unmount/remount content on every re-render.
+  const tabItems = useMemo(() => [
+    { id: 'player', title: 'Player', content: <PlayerView /> },
+    { id: 'queue', title: 'Queue', content: <QueueView /> },
+  ], []);
+
   return (
     <div id="ytm-container" ref={containerRef} style={{ height, overflow: 'hidden' }}>
       <Tabs
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}
-        tabs={[
-          { id: 'player', title: 'Player', content: <PlayerView /> },
-          { id: 'queue', title: 'Queue', content: <QueueView /> },
-        ]}
+        tabs={tabItems}
       />
     </div>
   );
-};
+});
 
 const PluginContent = () => {
   const { connected, authRequired } = usePlayer();
