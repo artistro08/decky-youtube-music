@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useReducer, type FC, type ReactNode } from 'react';
-import type { PlayerState } from '../types';
+import type { PlayerState, SongInfo } from '../types';
 import { getSongInfo } from '../services/apiClient';
 import { addStateListener, addAuthListener, disconnect, resetAndConnect } from '../services/websocketService';
 
@@ -15,10 +15,29 @@ const defaultState: PlayerState = {
   authRequired: false,
 };
 
-type Action = { type: 'UPDATE'; payload: Partial<PlayerState> };
+type Action =
+  | { type: 'UPDATE'; payload: Partial<PlayerState> }
+  | { type: 'SUPPLEMENT_SONG'; payload: SongInfo };
 
 const reducer = (state: PlayerState, action: Action): PlayerState => {
   if (action.type === 'UPDATE') return { ...state, ...action.payload };
+  if (action.type === 'SUPPLEMENT_SONG') {
+    const existing = state.song;
+    // No existing song — use HTTP data as-is (likeStatus will arrive via WS later).
+    if (!existing) return { ...state, song: action.payload };
+    // Stale response for a different video (race condition) — ignore.
+    if (existing.videoId !== action.payload.videoId) return state;
+    // Same song — merge: HTTP fills in fields WS omitted (e.g. albumArt),
+    // but does NOT overwrite fields WS already provided (e.g. likeStatus).
+    const merged: SongInfo = { ...existing };
+    (Object.keys(action.payload) as Array<keyof SongInfo>).forEach((k) => {
+      const v = action.payload[k];
+      if (v !== undefined && merged[k] === undefined) {
+        (merged as Record<string, unknown>)[k] = v;
+      }
+    });
+    return { ...state, song: merged };
+  }
   return state;
 };
 
@@ -48,7 +67,7 @@ export const PlayerProvider: FC<{ children: ReactNode }> = ({ children }) => {
     if (!state.connected) return;
     let cancelled = false;
     void getSongInfo().then((info) => {
-      if (!cancelled && info) dispatch({ type: 'UPDATE', payload: { song: info } });
+      if (!cancelled && info) dispatch({ type: 'SUPPLEMENT_SONG', payload: info });
     });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- dispatch is stable; intentionally omit to avoid extra fetches
