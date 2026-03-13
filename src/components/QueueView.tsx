@@ -1,5 +1,6 @@
 import { ButtonItem, DialogButton, Field, Focusable } from '@decky/ui';
 import { useEffect, useRef, useState } from 'react';
+import { FaTrash } from 'react-icons/fa';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
@@ -60,7 +61,7 @@ export const QueueView = () => {
 
   if (queue.length === 0) {
     return (
-      <Section title="Queue">
+      <Section>
         <div style={{ padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }}>
           Queue is empty
         </div>
@@ -69,8 +70,8 @@ export const QueueView = () => {
   }
 
   return (
-    <Section title="Queue">
-      <PaddedButton onClick={() => { void handleClear(); }}>Clear Queue</PaddedButton>
+    <Section>
+      <PaddedButton onClick={() => { void handleClear(); }}><FaTrash /> Clear Queue</PaddedButton>
 
       {queue.map((item, index) => {
         const r = getRenderer(item);
