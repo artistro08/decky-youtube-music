@@ -7,7 +7,7 @@ interface SectionProps {
 }
 
 export const Section = ({ title, noPull, children }: SectionProps) => (
-  <div style={noPull ? undefined : { margin: '0 -12px' }}>
+  <div style={noPull ? undefined : { margin: '0 -10px' }}>
     {title && (
       <div style={{
         padding: noPull ? '12px 0 4px' : '12px 12px 4px',
