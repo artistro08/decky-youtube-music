@@ -34,28 +34,44 @@ const TabsContainer = () => {
     setHeight(window.innerHeight - containerRect.top);
   }, []);
 
-  // Adjust Decky Tabs layout on mount and every tab switch.
+  // Inject CSS on mount to fix tab bar layout and prevent touch scroll jank.
+  // Replaces the per-tab-switch querySelectorAll DOM patches.
   useEffect(() => {
-    // Zero the content scroll container's injected left/right padding.
-    document.querySelectorAll<HTMLElement>('[class*="TabContentsScroll"]').forEach((el) => {
-      el.style.paddingLeft = '0';
-      el.style.paddingRight = '0';
-    });
-
-    // Shrink the tab bar row height.
-    document.querySelectorAll<HTMLElement>('[class*="TabHeaderRowWrapper"]').forEach((el) => {
-      el.style.minHeight = '32px';
-    });
-
-    // Scale down the L1/R1 glyph icons.
-    document.querySelectorAll<HTMLElement>('[class*="Glyphs"]').forEach((el) => {
-      el.style.transform = 'scale(0.65)';
-      el.style.transformOrigin = 'center center';
-    });
-  }, [activeTab]);
+    const el = document.createElement('style');
+    el.textContent = `
+      /* Cascade flex-column through Decky's wrapper between our div and Tabs DOM. */
+      #ytm-container > * {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      /* Tab bar: scoped, never shrinks. */
+      #ytm-container [class*="TabHeaderRowWrapper"] {
+        flex-shrink: 0 !important;
+        min-height: 32px !important;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+      }
+      /* Content scroll area: scoped, takes remaining height. overflow-y left alone. */
+      #ytm-container [class*="TabContentsScroll"] {
+        flex: 1 !important;
+        min-height: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      /* L1/R1 glyph icons: scoped. */
+      #ytm-container [class*="Glyphs"] {
+        transform: scale(0.65) !important;
+        transform-origin: center center !important;
+      }
+    `;
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, []);
 
   return (
-    <div ref={containerRef} style={{ height }}>
+    <div id="ytm-container" ref={containerRef} style={{ height, overflow: 'hidden' }}>
       <Tabs
         activeTab={activeTab}
         onShowTab={(tabID: string) => setActiveTab(tabID)}

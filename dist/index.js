@@ -81,8 +81,6 @@ function IconBase(props) {
 // THIS FILE IS AUTO GENERATED
 function FaVolumeUp (props) {
   return GenIcon({"attr":{"viewBox":"0 0 576 512"},"child":[{"tag":"path","attr":{"d":"M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81-11.61 6.41-15.84 21-9.45 32.61 6.43 11.66 21.05 15.8 32.61 9.45 28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"},"child":[]}]})(props);
-}function FaTrash (props) {
-  return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"},"child":[]}]})(props);
 }function FaThumbsUp (props) {
   return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M104 224H24c-13.255 0-24 10.745-24 24v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V248c0-13.255-10.745-24-24-24zM64 472c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zM384 81.452c0 42.416-25.97 66.208-33.277 94.548h101.723c33.397 0 59.397 27.746 59.553 58.098.084 17.938-7.546 37.249-19.439 49.197l-.11.11c9.836 23.337 8.237 56.037-9.308 79.469 8.681 25.895-.069 57.704-16.382 74.757 4.298 17.598 2.244 32.575-6.148 44.632C440.202 511.587 389.616 512 346.839 512l-2.845-.001c-48.287-.017-87.806-17.598-119.56-31.725-15.957-7.099-36.821-15.887-52.651-16.178-6.54-.12-11.783-5.457-11.783-11.998v-213.77c0-3.2 1.282-6.271 3.558-8.521 39.614-39.144 56.648-80.587 89.117-113.111 14.804-14.832 20.188-37.236 25.393-58.902C282.515 39.293 291.817 0 312 0c24 0 72 8 72 81.452z"},"child":[]}]})(props);
 }function FaThumbsDown (props) {
@@ -194,7 +192,6 @@ const getVolume = () => get('/volume');
 // Queue
 const getQueue = () => get('/queue');
 const removeFromQueue = (index) => del(`/queue/${index}`);
-const clearQueue = () => del('/queue');
 const setQueueIndex = (index) => patch('/queue', { index });
 
 const WS_URL = 'ws://127.0.0.1:26538/api/v1/ws';
@@ -425,8 +422,8 @@ const PaddedSlider = (props) => {
             return;
         const firstChild = ref.current.firstElementChild;
         if (firstChild) {
-            firstChild.style.paddingLeft = '16px';
-            firstChild.style.paddingRight = '16px';
+            firstChild.style.paddingLeft = '19px';
+            firstChild.style.paddingRight = '19px';
         }
         ref.current.querySelectorAll('*').forEach((el) => {
             if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
@@ -502,12 +499,12 @@ const PlayerView = () => {
     const albumArt = song?.albumArt;
     const title = song?.title ?? 'Nothing playing';
     const artist = song?.artist ?? '';
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }, children: [albumArt ? (SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '72px', height: '72px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 } })) : (SP_JSX.jsx("div", { style: {
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px' }, children: [albumArt ? (SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '72px', height: '72px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 } })) : (SP_JSX.jsx("div", { style: {
                                 width: '72px', height: '72px', borderRadius: '4px', flexShrink: 0,
                                 background: 'rgba(255,255,255,0.08)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--gpSystemLighterGrey)',
-                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
+                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', paddingRight: '16px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
 };
 
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
@@ -538,48 +535,44 @@ const QueueView = () => {
         await removeFromQueue(index);
         void loadQueue(true);
     };
-    const handleClear = async () => {
-        await clearQueue();
-        setQueue([]);
-    };
     if (loading) {
         return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '16px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Loading queue..." }) }));
     }
     if (queue.length === 0) {
         return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
     }
-    return (SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }, onClick: () => { void handleClear(); }, children: [SP_JSX.jsx(FaTrash, {}), " Clear Queue"] }) }), queue.map((item, index) => {
-                const r = getRenderer(item);
-                const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
-                const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
-                const isSelected = r?.selected ?? false;
-                if (DFL.DialogButton) {
-                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, style: {
-                                    flex: 1,
-                                    textAlign: 'left',
-                                    height: 'auto',
-                                    minHeight: '44px',
-                                    padding: '8px 16px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    borderRadius: '0',
-                                }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
-                                    width: '36px',
-                                    minWidth: '0',
-                                    padding: '0',
-                                    marginLeft: '0',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0,
-                                    borderRadius: '0',
-                                    borderLeft: '1px solid rgba(255,255,255,0.15)',
-                                }, children: "\u2715" })] }, index));
-                }
-                // Fallback when DialogButton unavailable
-                return (SP_JSX.jsx(DFL.Field, { label: SP_JSX.jsx("span", { style: { fontWeight: isSelected ? 'bold' : 'normal' }, children: title }), description: artist || undefined, onActivate: () => { void handleJump(index); }, onClick: () => { void handleJump(index); }, highlightOnFocus: true, focusable: true, bottomSeparator: "none" }, index));
-            })] }));
+    return (SP_JSX.jsx(Section, { children: queue.map((item, index) => {
+            const r = getRenderer(item);
+            const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
+            const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
+            const isSelected = r?.selected ?? false;
+            if (DFL.DialogButton) {
+                return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, style: {
+                                flex: 1,
+                                textAlign: 'left',
+                                height: 'auto',
+                                minHeight: '44px',
+                                padding: '8px 16px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                borderRadius: '0',
+                            }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
+                                width: '36px',
+                                minWidth: '0',
+                                padding: '0',
+                                marginLeft: '0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                                borderRadius: '0',
+                                borderLeft: '1px solid rgba(255,255,255,0.15)',
+                            }, children: "\u2715" })] }, index));
+            }
+            // Fallback when DialogButton unavailable
+            return (SP_JSX.jsx(DFL.Field, { label: SP_JSX.jsx("span", { style: { fontWeight: isSelected ? 'bold' : 'normal' }, children: title }), description: artist || undefined, onActivate: () => { void handleJump(index); }, onClick: () => { void handleJump(index); }, highlightOnFocus: true, focusable: true, bottomSeparator: "none" }, index));
+        }) }));
 };
 
 const TabsContainer = () => {
@@ -604,24 +597,42 @@ const TabsContainer = () => {
         }
         setHeight(window.innerHeight - containerRect.top);
     }, []);
-    // Adjust Decky Tabs layout on mount and every tab switch.
+    // Inject CSS on mount to fix tab bar layout and prevent touch scroll jank.
+    // Replaces the per-tab-switch querySelectorAll DOM patches.
     SP_REACT.useEffect(() => {
-        // Zero the content scroll container's injected left/right padding.
-        document.querySelectorAll('[class*="TabContentsScroll"]').forEach((el) => {
-            el.style.paddingLeft = '0';
-            el.style.paddingRight = '0';
-        });
-        // Shrink the tab bar row height.
-        document.querySelectorAll('[class*="TabHeaderRowWrapper"]').forEach((el) => {
-            el.style.minHeight = '32px';
-        });
-        // Scale down the L1/R1 glyph icons.
-        document.querySelectorAll('[class*="Glyphs"]').forEach((el) => {
-            el.style.transform = 'scale(0.65)';
-            el.style.transformOrigin = 'center center';
-        });
-    }, [activeTab]);
-    return (SP_JSX.jsx("div", { ref: containerRef, style: { height }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [
+        const el = document.createElement('style');
+        el.textContent = `
+      /* Cascade flex-column through Decky's wrapper between our div and Tabs DOM. */
+      #ytm-container > * {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      /* Tab bar: scoped, never shrinks. */
+      #ytm-container [class*="TabHeaderRowWrapper"] {
+        flex-shrink: 0 !important;
+        min-height: 32px !important;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+      }
+      /* Content scroll area: scoped, takes remaining height. overflow-y left alone. */
+      #ytm-container [class*="TabContentsScroll"] {
+        flex: 1 !important;
+        min-height: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      /* L1/R1 glyph icons: scoped. */
+      #ytm-container [class*="Glyphs"] {
+        transform: scale(0.65) !important;
+        transform-origin: center center !important;
+      }
+    `;
+        document.head.appendChild(el);
+        return () => el.remove();
+    }, []);
+    return (SP_JSX.jsx("div", { id: "ytm-container", ref: containerRef, style: { height, overflow: 'hidden' }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: [
                 { id: 'player', title: 'Player', content: SP_JSX.jsx(PlayerView, {}) },
                 { id: 'queue', title: 'Queue', content: SP_JSX.jsx(QueueView, {}) },
             ] }) }));
