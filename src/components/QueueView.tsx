@@ -90,8 +90,8 @@ export const QueueView = () => {
                 onClick={() => { void handleJump(index); }}
               >
                 <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                  {isSelected && <IoPlay size={11} style={{ marginRight: '6px', flexShrink: 0 }} />}
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
+                  <IoPlay size={11} style={{ marginRight: '6px', flexShrink: 0, visibility: isSelected ? 'visible' : 'hidden' }} />
+                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', maskImage: 'linear-gradient(to right, black calc(100% - 24px), transparent 100%)' }}>{title}</span>
                 </div>
                 {artist && (
                   <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
