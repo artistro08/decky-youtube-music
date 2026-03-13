@@ -1,6 +1,8 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
 import type { SliderFieldProps } from '@decky/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FaStepBackward, FaPlay, FaPause, FaStepForward, FaThumbsUp, FaThumbsDown, FaVolumeUp, FaRandom } from 'react-icons/fa';
+import { MdRepeat, MdRepeatOne } from 'react-icons/md';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -15,8 +17,6 @@ import {
   togglePlay,
 } from '../services/apiClient';
 import { Section } from './Section';
-import { FaStepBackward, FaPlay, FaPause, FaStepForward, FaThumbsUp, FaThumbsDown, FaVolumeUp, FaRandom } from 'react-icons/fa';
-import { MdRepeat, MdRepeatOne } from 'react-icons/md';
 
 const REPEAT_NEXT: Record<string, number> = { NONE: 1, ALL: 1, ONE: 1 };
 const REPEAT_ICONS: Record<string, React.ReactElement> = {
