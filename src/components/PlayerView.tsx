@@ -1,6 +1,6 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
 import type { SliderFieldProps } from '@decky/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
   dislike,
@@ -12,17 +12,18 @@ import {
   setVolume,
   shuffle,
   switchRepeat,
-  toggleMute,
   togglePlay,
 } from '../services/apiClient';
 import { Section } from './Section';
+import { FaStepBackward, FaPlay, FaPause, FaStepForward, FaThumbsUp, FaThumbsDown, FaVolumeUp, FaRandom } from 'react-icons/fa';
+import { MdRepeat, MdRepeatOne } from 'react-icons/md';
 
-const REPEAT_LABELS: Record<string, string> = {
-  NONE: 'Repeat: Off',
-  ALL: 'Repeat: All',
-  ONE: 'Repeat: One',
-};
 const REPEAT_NEXT: Record<string, number> = { NONE: 1, ALL: 1, ONE: 1 };
+const REPEAT_ICONS: Record<string, React.ReactElement> = {
+  NONE: <MdRepeat size={16} style={{ color: 'var(--gpSystemLighterGrey)' }} />,
+  ALL: <MdRepeat size={16} style={{ color: 'white' }} />,
+  ONE: <MdRepeatOne size={16} style={{ color: 'white' }} />,
+};
 
 const rowBtnFirst: React.CSSProperties = {
   marginLeft: '0px',
@@ -90,59 +91,52 @@ const PaddedSlider = (props: SliderFieldProps) => {
   );
 };
 
-// Module-level cache — survives PlayerView unmount/remount when the user
-// switches tabs, so the slider restores the last known value rather than
-// whatever the context (potentially stale) reports at remount time.
-let _cachedVolume: number | null = null;
-let _cachedMuted: boolean | null = null;
+// Persists across remounts (QAP close/reopen). Tracks the last value the user
+// explicitly set via the slider. null = user has never touched it, safe to
+// fetch from the API. Cleared on WS disconnect so a YTM restart re-fetches
+// the fresh player volume.
+let _lastUserVolume: number | null = null;
 
 export const PlayerView = () => {
-  const { song, isPlaying, volume, muted, shuffle: isShuffled, repeat, position, connected } = usePlayer();
+  const { song, isPlaying, volume, shuffle: isShuffled, repeat, position, connected } = usePlayer();
 
-  // Local display state for the volume slider.
-  // Problems solved:
-  //   1. Touch drag fires onChange rapidly; multiple API calls come back via WebSocket
-  //      out of order and snap the slider to stale values mid-drag.
-  //   2. D-pad presses jump because WebSocket resets displayVolume between presses.
-  //   3. muted from context forced value=0, making every d-pad press compute from 0
-  //      so the slider could never increase beyond 1 step.
-  //   4. 500ms cooldown was shorter than the API round-trip, letting stale WebSocket
-  //      events snap the slider back after the cooldown expired.
-  //   5. PLAYER_INFO messages with undefined volume defaulted to 100, corrupting
-  //      context on tab switch. Fixed in websocketService + cached here as backup.
-  //
-  // Fix: block WebSocket syncs while adjusting (+ 1500ms cooldown after last change),
-  // always pass displayVolume (not muted?0) as the slider value so d-pad computes
-  // from the real level, and track displayMuted locally so the label/button stay
-  // correct without letting the WebSocket muted field interfere with the slider.
-  const [displayVolume, setDisplayVolume] = useState(() => _cachedVolume ?? volume);
-  const [displayMuted, setDisplayMuted] = useState(() => _cachedMuted ?? muted);
+  // Seed from the user's last-set value on remount; fall back to context.
+  const [displayVolume, setDisplayVolume] = useState(() => _lastUserVolume ?? volume);
   const adjustingRef = useRef(false);
   const cooldownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wasConnectedRef = useRef(false);
 
-  // The WebSocket `volume` field is unreliable for display — it appears to come
-  // from a different source/scale than the 0-100 value the API accepts and the
-  // app displays (e.g. the user sets 55, app shows 55, WebSocket reports 24).
-  // Syncing displayVolume from the WebSocket would corrupt the slider.
-  //
-  // Fetch the real volume via HTTP whenever connected. This covers both first
-  // load (no cached value) and reconnections after YouTube Music restarts
-  // (where _cachedVolume from the previous session would otherwise be stale).
-  useEffect(() => {
-    if (!connected) return;
+  // Only fetch from the API when the user hasn't set a value yet.
+  // getVolume() returns the player's internal scale which differs from the
+  // 0-100 linear scale setVolume() accepts — so we must never call it after
+  // the user has touched the slider.
+  const fetchVolume = useCallback(() => {
+    if (_lastUserVolume !== null) return;
     void getVolume().then((res) => {
       if (res !== null && !adjustingRef.current) {
-        _cachedVolume = res.state;
         setDisplayVolume(res.state);
       }
     });
+  }, []);
+
+  // Clear the user-set cache only on a true connected→disconnected transition
+  // (e.g. YTM restart). Guarded by wasConnectedRef so the initial mount with
+  // connected=false does NOT wipe the persisted user value.
+  useEffect(() => {
+    if (connected) {
+      wasConnectedRef.current = true;
+    } else if (wasConnectedRef.current) {
+      _lastUserVolume = null;
+    }
   }, [connected]);
 
-  // muted is a simple boolean — keep it in sync with context (no scale issue).
-  useEffect(() => {
-    if (!adjustingRef.current) { _cachedMuted = muted; setDisplayMuted(muted); }
-  }, [muted]);
+  // Fetch on mount — covers the !Tabs fallback remount case.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (connected) fetchVolume(); }, []);
+
+  // Fetch on connect/reconnect (e.g. after YTM restart).
+  useEffect(() => { if (connected) fetchVolume(); }, [connected, fetchVolume]);
 
   // Cleanup timers on unmount.
   useEffect(() => () => {
@@ -151,16 +145,13 @@ export const PlayerView = () => {
   }, []);
 
   const handleVolumeChange = (val: number) => {
-    adjustingRef.current = true;
-    _cachedVolume = val;
+    _lastUserVolume = val;
     setDisplayVolume(val);
+    adjustingRef.current = true;
 
-    // Keep adjustingRef true for 1500ms so the muted WebSocket sync and the
-    // mount-time getVolume() fetch don't overwrite the user's in-flight value.
     if (cooldownTimer.current) clearTimeout(cooldownTimer.current);
-    cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 1500);
+    cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 600);
 
-    // Debounce the API call — only fire after 300ms of no further changes.
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => { void setVolume(val); }, 300);
   };
@@ -185,21 +176,11 @@ export const PlayerView = () => {
         </Section>
       )}
 
-      {/* Track info */}
-      <Section>
-        <div style={{ textAlign: 'center', padding: '8px 0' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {title}
-          </div>
-          {artist && (
-            <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
-              {artist}
-            </div>
-          )}
-        </div>
-        {duration > 0 && (
+      {/* Track info + progress bar */}
+      {duration > 0 && (
+        <Section>
           <PaddedSlider
-            label=""
+            label={artist ? `${title} / ${artist}` : title}
             value={position}
             min={0}
             max={duration}
@@ -207,67 +188,71 @@ export const PlayerView = () => {
             onChange={(val) => { void seekTo(val); }}
             showValue={false}
           />
-        )}
-      </Section>
+        </Section>
+      )}
 
       {/* Prev / Play / Next */}
-      <Section title="Controls" noPull>
+      <Section noPull>
         {DialogButton ? (
           <>
             <Focusable
               style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
               flow-children="horizontal"
             >
-              <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}>⏮</DialogButton>
+              <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}><FaStepBackward /></DialogButton>
               <DialogButton style={rowBtn} onClick={() => { void togglePlay(); }}>
-                {isPlaying ? '⏸' : '▶'}
+                {isPlaying ? <FaPause /> : <FaPlay />}
               </DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
+              <DialogButton style={rowBtn} onClick={() => { void next(); }}><FaStepForward /></DialogButton>
             </Focusable>
             <Focusable
               style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
               flow-children="horizontal"
             >
-              <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void dislike(); }}>👎 Dislike</DialogButton>
+              <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}><FaThumbsUp /></DialogButton>
+              <DialogButton style={rowBtn} onClick={() => { void dislike(); }}><FaThumbsDown /></DialogButton>
             </Focusable>
           </>
         ) : (
           <>
-            <ButtonItem onClick={() => { void previous(); }}>⏮ Previous</ButtonItem>
-            <ButtonItem onClick={() => { void togglePlay(); }}>{isPlaying ? '⏸ Pause' : '▶ Play'}</ButtonItem>
-            <ButtonItem onClick={() => { void next(); }}>⏭ Next</ButtonItem>
-            <ButtonItem onClick={() => { void like(); }}>👍 Like</ButtonItem>
-            <ButtonItem onClick={() => { void dislike(); }}>👎 Dislike</ButtonItem>
+            <ButtonItem onClick={() => { void previous(); }}><FaStepBackward /> Previous</ButtonItem>
+            <ButtonItem onClick={() => { void togglePlay(); }}>{isPlaying ? <><FaPause /> Pause</> : <><FaPlay /> Play</>}</ButtonItem>
+            <ButtonItem onClick={() => { void next(); }}><FaStepForward /> Next</ButtonItem>
+            <ButtonItem onClick={() => { void like(); }}><FaThumbsUp /></ButtonItem>
+            <ButtonItem onClick={() => { void dislike(); }}><FaThumbsDown /></ButtonItem>
           </>
         )}
       </Section>
 
       {/* Volume */}
-      <Section title="Volume">
-        <PaddedSlider
-          label={displayMuted ? 'Muted' : `${Math.round(displayVolume)}%`}
-          value={displayVolume}
-          min={0}
-          max={100}
-          step={1}
-          onChange={handleVolumeChange}
-          showValue={false}
-        />
-        <PaddedButton onClick={() => { void toggleMute(); }}>
-          {displayMuted ? '🔇 Unmute' : '🔊 Mute'}
-        </PaddedButton>
+      <Section>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, paddingLeft: '12px' }}>
+            <FaVolumeUp size={14} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <PaddedSlider
+              label=""
+              value={displayVolume}
+              min={0}
+              max={100}
+              step={1}
+              onChange={handleVolumeChange}
+              showValue={false}
+            />
+          </div>
+        </div>
       </Section>
 
       {/* Playback options */}
-      <Section title="Playback">
+      <Section>
         <PaddedToggle
-          label="Shuffle"
+          label={<span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><FaRandom size={12} /> Shuffle</span>}
           checked={isShuffled}
           onChange={() => { void shuffle(); }}
         />
         <PaddedButton onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
-          {REPEAT_LABELS[repeat] ?? 'Repeat: Off'}
+          {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
         </PaddedButton>
       </Section>
     </>
