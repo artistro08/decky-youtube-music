@@ -92,7 +92,7 @@ export const QueueView = () => {
                 onClick={() => { void handleJump(index); }}
               >
                 {/* Thumbnail */}
-                <div style={{ width: '44px', flexShrink: 0, position: 'relative', background: 'rgba(255,255,255,0.05)' }}>
+                <div style={{ width: '44px', height: '44px', flexShrink: 0, alignSelf: 'center', position: 'relative', background: 'rgba(255,255,255,0.05)' }}>
                   {r?.thumbnail?.thumbnails?.[0]?.url ? (
                     <img
                       src={r.thumbnail.thumbnails[0].url}
