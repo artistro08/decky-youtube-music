@@ -359,9 +359,14 @@ function MdRepeatOne (props) {
 
 const REPEAT_NEXT = { NONE: 1, ALL: 1, ONE: 1 };
 const REPEAT_ICONS = {
-    NONE: SP_JSX.jsx(MdRepeat, { size: 16, style: { color: 'var(--gpSystemLighterGrey)' } }),
-    ALL: SP_JSX.jsx(MdRepeat, { size: 16, style: { color: 'white' } }),
-    ONE: SP_JSX.jsx(MdRepeatOne, { size: 16, style: { color: 'white' } }),
+    NONE: SP_JSX.jsx(MdRepeat, { size: 16, style: { opacity: 0.4 } }),
+    ALL: SP_JSX.jsx(MdRepeat, { size: 16, style: { opacity: 1 } }),
+    ONE: SP_JSX.jsx(MdRepeatOne, { size: 16, style: { opacity: 1 } }),
+};
+const REPEAT_LABELS = {
+    NONE: 'Off',
+    ALL: 'All',
+    ONE: 'One',
 };
 const rowBtnFirst = {
     marginLeft: '0px',
@@ -384,17 +389,8 @@ const rowBtn = {
 // Wraps a SliderField in a 12px-padded container and removes Decky's
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el) => {
-    el.style.paddingLeft = '12px';
-    el.style.paddingRight = '12px';
-};
-const PaddedButton$1 = (props) => {
-    const ref = SP_REACT.useRef(null);
-    SP_REACT.useEffect(() => {
-        const first = ref.current?.firstElementChild;
-        if (first)
-            applyInnerPadding(first);
-    }, []);
-    return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ButtonItem, { ...props }) });
+    el.style.paddingLeft = '16px';
+    el.style.paddingRight = '16px';
 };
 const PaddedToggle = (props) => {
     const ref = SP_REACT.useRef(null);
@@ -490,20 +486,9 @@ const PlayerView = () => {
     const title = song?.title ?? 'Nothing playing';
     const artist = song?.artist ?? '';
     const duration = song?.songDuration ?? 0;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), duration > 0 && (SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { label: artist ? `${title} / ${artist}` : title, value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }) })), SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }), SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { display: 'flex', alignItems: 'center' }, children: [SP_JSX.jsx("div", { style: { width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, paddingLeft: '12px' }, children: SP_JSX.jsx(FaVolumeUp, { size: 14 }) }), SP_JSX.jsx("div", { style: { flex: 1 }, children: SP_JSX.jsx(PaddedSlider, { label: "", value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) })] }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(PaddedButton$1, { onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE })] })] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), duration > 0 && (SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { label: artist ? `${title} / ${artist}` : title, value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }) })), SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 14 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
 };
 
-const PaddedButton = (props) => {
-    const ref = SP_REACT.useRef(null);
-    SP_REACT.useEffect(() => {
-        const first = ref.current?.firstElementChild;
-        if (first) {
-            first.style.paddingLeft = '12px';
-            first.style.paddingRight = '12px';
-        }
-    }, []);
-    return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ButtonItem, { ...props }) });
-};
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
     item.playlistPanelVideoWrapperRenderer?.primaryRenderer?.playlistPanelVideoRenderer;
 const QueueView = () => {
@@ -536,13 +521,13 @@ const QueueView = () => {
     if (queue.length === 0) {
         return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
     }
-    return (SP_JSX.jsxs(Section, { children: [SP_JSX.jsxs(PaddedButton, { onClick: () => { void handleClear(); }, children: [SP_JSX.jsx(FaTrash, {}), " Clear Queue"] }), queue.map((item, index) => {
+    return (SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }, onClick: () => { void handleClear(); }, children: [SP_JSX.jsx(FaTrash, {}), " Clear Queue"] }) }), queue.map((item, index) => {
                 const r = getRenderer(item);
                 const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
                 const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
                 const isSelected = r?.selected ?? false;
                 if (DFL.DialogButton) {
-                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '12px', paddingRight: '12px', paddingTop: '4px', paddingBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { style: {
+                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '16px', paddingRight: '16px', paddingTop: '4px', paddingBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { style: {
                                     flex: 1,
                                     textAlign: 'left',
                                     height: 'auto',
