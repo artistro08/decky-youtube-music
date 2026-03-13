@@ -181,7 +181,15 @@ const switchRepeat = (iteration) => post('/switch-repeat', { iteration });
 const like = () => post('/like');
 const dislike = () => post('/dislike');
 // Song & state
-const getSongInfo = () => get('/song');
+const getSongInfo = async () => {
+    const info = await get('/song');
+    if (!info)
+        return null;
+    // Companion API uses imageSrc; normalise to albumArt for internal use.
+    if (!info.albumArt && info.imageSrc)
+        info.albumArt = info.imageSrc;
+    return info;
+};
 const getVolume = () => get('/volume');
 // Queue
 const getQueue = () => get('/queue');

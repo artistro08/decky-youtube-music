@@ -83,7 +83,13 @@ export const like = () => post('/like');
 export const dislike = () => post('/dislike');
 
 // Song & state
-export const getSongInfo = () => get<SongInfo>('/song');
+export const getSongInfo = async (): Promise<SongInfo | null> => {
+  const info = await get<SongInfo>('/song');
+  if (!info) return null;
+  // Companion API uses imageSrc; normalise to albumArt for internal use.
+  if (!info.albumArt && info.imageSrc) info.albumArt = info.imageSrc;
+  return info;
+};
 export const getVolume = () => get<{ state: number; isMuted: boolean }>('/volume');
 
 // Queue

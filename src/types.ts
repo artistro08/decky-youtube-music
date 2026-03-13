@@ -4,6 +4,7 @@ export interface SongInfo {
   artist?: string;
   album?: string;
   albumArt?: string;
+  imageSrc?: string;   // raw field name returned by the companion API
   videoId?: string;
   isPaused?: boolean;
   elapsedSeconds?: number;
