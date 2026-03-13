@@ -477,9 +477,11 @@ const PlayerView = () => {
         _lastUserVolume = val;
         setDisplayVolume(val);
         adjustingRef.current = true;
+        // Keep adjustingRef true for 1500ms so the mount-time getVolume() fetch
+        // and any volume WebSocket sync don't overwrite the user's in-flight value.
         if (cooldownTimer.current)
             clearTimeout(cooldownTimer.current);
-        cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 600);
+        cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 1500);
         if (debounceTimer.current)
             clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(() => { void setVolume(val); }, 300);
