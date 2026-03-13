@@ -121,3 +121,20 @@ export const search = async (query: string): Promise<SearchResultItem[]> => {
     return [];
   }
 };
+
+export const requestAuth = async (id: string): Promise<string> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+  try {
+    const res = await fetch(`${BASE_URL}/auth/${encodeURIComponent(id)}`, {
+      method: 'POST',
+      signal: controller.signal,
+    });
+    if (res.status === 403) throw new Error('denied');
+    if (!res.ok) throw new Error(`auth failed: ${res.status}`);
+    const data = await res.json() as { accessToken: string };
+    return data.accessToken;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
