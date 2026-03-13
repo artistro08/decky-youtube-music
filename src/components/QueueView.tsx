@@ -1,21 +1,9 @@
-import { ButtonItem, DialogButton, Field, Focusable } from '@decky/ui';
-import { useEffect, useRef, useState } from 'react';
+import { DialogButton, Field, Focusable } from '@decky/ui';
+import { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { clearQueue, getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
-
-const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const first = ref.current?.firstElementChild as HTMLElement | null;
-    if (first) {
-      first.style.paddingLeft = '12px';
-      first.style.paddingRight = '12px';
-    }
-  }, []);
-  return <div ref={ref}><ButtonItem {...props} /></div>;
-};
 
 const getRenderer = (item: QueueItem) =>
   item.playlistPanelVideoRenderer ??
@@ -71,7 +59,14 @@ export const QueueView = () => {
 
   return (
     <Section>
-      <PaddedButton onClick={() => { void handleClear(); }}><FaTrash /> Clear Queue</PaddedButton>
+      <Focusable>
+        <DialogButton
+          style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
+          onClick={() => { void handleClear(); }}
+        >
+          <FaTrash /> Clear Queue
+        </DialogButton>
+      </Focusable>
 
       {queue.map((item, index) => {
         const r = getRenderer(item);
