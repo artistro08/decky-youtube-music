@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useReducer, type FC, type ReactNode } from 'react';
 import type { PlayerState } from '../types';
+import { getSongInfo } from '../services/apiClient';
 import { addStateListener, addAuthListener, disconnect, resetAndConnect } from '../services/websocketService';
 
 const defaultState: PlayerState = {
@@ -40,6 +41,16 @@ export const PlayerProvider: FC<{ children: ReactNode }> = ({ children }) => {
       disconnect();
     };
   }, []);
+
+  // Supplement WebSocket song data with HTTP response when the song changes.
+  // The WS payload often omits albumArt; GET /api/v1/song always includes it.
+  useEffect(() => {
+    if (!state.connected) return;
+    void getSongInfo().then((info) => {
+      if (info) dispatch({ type: 'UPDATE', payload: { song: info } });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.song?.videoId, state.connected]);
 
   return <PlayerContext.Provider value={state}>{children}</PlayerContext.Provider>;
 };

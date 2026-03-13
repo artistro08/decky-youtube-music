@@ -181,6 +181,8 @@ const shuffle = () => post('/shuffle');
 const switchRepeat = (iteration) => post('/switch-repeat', { iteration });
 const like = () => post('/like');
 const dislike = () => post('/dislike');
+// Song & state
+const getSongInfo = () => get('/song');
 const getVolume = () => get('/volume');
 // Queue
 const getQueue = () => get('/queue');
@@ -323,6 +325,17 @@ const PlayerProvider = ({ children }) => {
             disconnect();
         };
     }, []);
+    // Supplement WebSocket song data with HTTP response when the song changes.
+    // The WS payload often omits albumArt; GET /api/v1/song always includes it.
+    SP_REACT.useEffect(() => {
+        if (!state.connected)
+            return;
+        void getSongInfo().then((info) => {
+            if (info)
+                dispatch({ type: 'UPDATE', payload: { song: info } });
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state.song?.videoId, state.connected]);
     return SP_JSX.jsx(PlayerContext.Provider, { value: state, children: children });
 };
 const usePlayer = () => SP_REACT.useContext(PlayerContext);
@@ -336,7 +349,7 @@ const Section = ({ title, noPull, children }) => (SP_JSX.jsxs("div", { style: no
                 letterSpacing: '0.04em',
             }, children: title })), children] }));
 
-const NotConnectedView = () => (SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '16px', color: 'var(--gpSystemLighterGrey)' }, children: [SP_JSX.jsx("div", { style: { fontSize: '32px', marginBottom: '8px' }, children: "\uD83C\uDFB5" }), SP_JSX.jsx("div", { style: { fontWeight: 'bold', marginBottom: '8px' }, children: "Not Connected" }), SP_JSX.jsxs("div", { style: { fontSize: '12px', lineHeight: '1.4' }, children: ["Open YouTube Music and enable the ", SP_JSX.jsx("strong", { children: "API Server" }), " plugin in its settings. The plugin will connect automatically."] })] }) }));
+const NotConnectedView = () => (SP_JSX.jsx(Section, { children: SP_JSX.jsxs("div", { style: { textAlign: 'center', padding: '16px', color: 'var(--gpSystemLighterGrey)' }, children: [SP_JSX.jsx("div", { style: { fontSize: '32px', marginBottom: '8px' }, children: SP_JSX.jsx(FaMusic, { size: 32 }) }), SP_JSX.jsx("div", { style: { fontWeight: 'bold', marginBottom: '8px' }, children: "Not Connected" }), SP_JSX.jsxs("div", { style: { fontSize: '12px', lineHeight: '1.4' }, children: ["Open YouTube Music and enable the ", SP_JSX.jsx("strong", { children: "API Server" }), " plugin in its settings. The plugin will connect automatically."] })] }) }));
 
 const AuthTokenView = () => {
     const [token, setTokenInput] = SP_REACT.useState('');
@@ -368,8 +381,7 @@ const REPEAT_LABELS = {
     ALL: 'All',
     ONE: 'One',
 };
-const rowBtnFirst = {
-    marginLeft: '0px',
+const rowBtnBase = {
     height: '30px',
     display: 'flex',
     alignItems: 'center',
@@ -377,17 +389,11 @@ const rowBtnFirst = {
     minWidth: '0',
     flex: 1,
     padding: '0 8px',
+    marginLeft: '0',
 };
-const rowBtn = {
-    marginLeft: '5px',
-    height: '30px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: '0',
-    flex: 1,
-    padding: '0 8px',
-};
+const rowBtnFirst = { ...rowBtnBase, borderRadius: '4px 0 0 4px' };
+const rowBtnMid = { ...rowBtnBase, borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const rowBtnLast = { ...rowBtnBase, borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
 // Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el) => {
@@ -488,7 +494,7 @@ const PlayerView = () => {
     const title = song?.title ?? 'Nothing playing';
     const artist = song?.artist ?? '';
     const duration = song?.songDuration ?? 0;
-    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), duration > 0 && (SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { label: artist ? `${title} / ${artist}` : title, value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }) })), SP_JSX.jsx("div", { style: { marginTop: '10px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtn, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 14 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
+    return (SP_JSX.jsxs(SP_JSX.Fragment, { children: [albumArt && (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { display: 'flex', justifyContent: 'center', padding: '8px 0' }, children: SP_JSX.jsx("img", { src: albumArt, alt: "Album art", style: { width: '100%', maxWidth: '180px', borderRadius: '8px' } }) }) })), duration > 0 && (SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { label: artist ? `${title} / ${artist}` : title, value: position, min: 0, max: duration, step: 1, onChange: (val) => { void seekTo(val); }, showValue: false }) })), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
 };
 
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
@@ -505,6 +511,12 @@ const QueueView = () => {
             setLoading(false);
     };
     SP_REACT.useEffect(() => { void loadQueue(); }, []);
+    SP_REACT.useEffect(() => {
+        const el = document.createElement('style');
+        el.textContent = '.yt-queue-active:not(:focus):not(:focus-within) { background: rgba(255,255,255,0) !important; }';
+        document.head.appendChild(el);
+        return () => el.remove();
+    }, []);
     const handleJump = async (index) => {
         await setQueueIndex(index);
         void loadQueue(true);
@@ -529,17 +541,17 @@ const QueueView = () => {
                 const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
                 const isSelected = r?.selected ?? false;
                 if (DFL.DialogButton) {
-                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { style: {
+                    return (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }, "flow-children": "horizontal", children: [SP_JSX.jsxs(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, style: {
                                     flex: 1,
                                     textAlign: 'left',
                                     height: 'auto',
                                     minHeight: '44px',
-                                    padding: '4px 16px',
+                                    padding: '8px 16px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     justifyContent: 'center',
                                     borderRadius: '0',
-                                }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { onClick: () => { void handleRemove(index); }, style: {
+                                }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
                                     width: '36px',
                                     minWidth: '0',
                                     padding: '0',
