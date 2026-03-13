@@ -20,9 +20,15 @@ import { Section } from './Section';
 
 const REPEAT_NEXT: Record<string, number> = { NONE: 1, ALL: 1, ONE: 1 };
 const REPEAT_ICONS: Record<string, React.ReactElement> = {
-  NONE: <MdRepeat size={16} style={{ color: 'var(--gpSystemLighterGrey)' }} />,
-  ALL: <MdRepeat size={16} style={{ color: 'white' }} />,
-  ONE: <MdRepeatOne size={16} style={{ color: 'white' }} />,
+  NONE: <MdRepeat size={16} style={{ opacity: 0.4 }} />,
+  ALL:  <MdRepeat size={16} style={{ opacity: 1 }} />,
+  ONE:  <MdRepeatOne size={16} style={{ opacity: 1 }} />,
+};
+
+const REPEAT_LABELS: Record<string, string> = {
+  NONE: 'Off',
+  ALL:  'All',
+  ONE:  'One',
 };
 
 const rowBtnFirst: React.CSSProperties = {
@@ -52,14 +58,6 @@ const applyInnerPadding = (el: HTMLElement) => {
   el.style.paddingRight = '12px';
 };
 
-const PaddedButton = (props: React.ComponentProps<typeof ButtonItem>) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const first = ref.current?.firstElementChild as HTMLElement | null;
-    if (first) applyInnerPadding(first);
-  }, []);
-  return <div ref={ref}><ButtonItem {...props} /></div>;
-};
 
 const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -246,9 +244,15 @@ export const PlayerView = () => {
           checked={isShuffled}
           onChange={() => { void shuffle(); }}
         />
-        <PaddedButton onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}>
-          {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
-        </PaddedButton>
+        <Focusable>
+          <DialogButton
+            style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
+            onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
+          >
+            {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
+            Repeat: {REPEAT_LABELS[repeat] ?? 'Off'}
+          </DialogButton>
+        </Focusable>
       </Section>
     </>
   );
