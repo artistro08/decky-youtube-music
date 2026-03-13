@@ -1,21 +1,22 @@
-# UI Fixes: Volume Icon, Slider Offset, Full-Width Buttons, Repeat Label
+# UI Fixes: Volume Icon, Slider Offset, Full-Width Buttons, Repeat Label, Side Padding
 
 ## Goal
 
-Fix five visual issues found after the initial UI polish pass:
+Fix six visual issues found after the initial UI polish pass:
 1. Volume icon rendered via native `icon` prop instead of a custom flex row wrapper
 2. Volume slider layout offset caused by empty `label` prop
 3. Repeat button not full width
 4. Clear Queue button not full width
 5. Repeat button shows icon only — needs text label indicating current state
+6. Increase side padding from 12px to 16px throughout both components
 
 ---
 
 ## Scope
 
 All changes are confined to two files:
-- `src/components/PlayerView.tsx` — volume section, repeat button
-- `src/components/QueueView.tsx` — Clear Queue button
+- `src/components/PlayerView.tsx` — volume section, repeat button, padding
+- `src/components/QueueView.tsx` — Clear Queue button, padding
 
 No new files. No changes to context, services, or types.
 
@@ -44,7 +45,7 @@ No new files. No changes to context, services, or types.
 - Replace the Repeat button JSX first (so `PaddedButton` is no longer referenced), then **delete the `PaddedButton` component definition** from `PlayerView.tsx`. Order matters: deleting the definition before replacing the JSX reference will break the build mid-task.
 - Add `REPEAT_LABELS: Record<string, string> = { NONE: 'Off', ALL: 'All', ONE: 'One' }`.
 - Button content: `[icon] Repeat: [label]` rendered as a flex row with a gap.
-- `DialogButton` style: `height: '30px'`, `display: 'flex'`, `alignItems: 'center'`, `justifyContent: 'flex-start'`, `gap: '6px'`, `paddingLeft: '12px'`.
+- `DialogButton` style: `height: '30px'`, `display: 'flex'`, `alignItems: 'center'`, `justifyContent: 'flex-start'`, `gap: '6px'`, `paddingLeft: '16px'`.
 
 **Icon visibility (highlighted vs. normal):** The `REPEAT_ICONS` map must NOT use hardcoded `color` values. Instead, differentiate state via `opacity`:
 - `NONE` (Off): `opacity: 0.4`
@@ -72,7 +73,7 @@ Button render:
 ```tsx
 <Focusable>
   <DialogButton
-    style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '12px' }}
+    style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
     onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
   >
     {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
@@ -93,13 +94,27 @@ Button render:
 ```tsx
 <Focusable>
   <DialogButton
-    style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '12px' }}
+    style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
     onClick={() => { void handleClear(); }}
   >
     <FaTrash /> Clear Queue
   </DialogButton>
 </Focusable>
 ```
+
+### 5. Increase Side Padding — 12px → 16px
+
+All hardcoded `12px` horizontal padding values throughout both files must be updated to `16px`. Specific locations:
+
+**`PlayerView.tsx`:**
+- `applyInnerPadding`: `paddingLeft = '12px'` and `paddingRight = '12px'` → `'16px'` (applies to `PaddedButton` and `PaddedToggle` wrappers — affects the Shuffle toggle)
+- New Repeat `DialogButton` style: `paddingLeft: '16px'` (already reflected in Section 3 snippet)
+
+**`QueueView.tsx`:**
+- Queue item `Focusable` wrapper: `paddingLeft: '12px', paddingRight: '12px'` → `'16px'`
+- New Clear Queue `DialogButton` style: `paddingLeft: '16px'` (already reflected in Section 4 snippet)
+
+The `PaddedSlider` inner padding (`10px`) is a separate value tied to slider layout geometry — do not change it.
 
 ---
 
