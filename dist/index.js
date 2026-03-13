@@ -285,10 +285,13 @@ const handleMessage = (msg) => {
             notify({ position: msg.position ?? 0 });
             break;
         case 'VOLUME_CHANGED': {
-            // WebSocket volume is on a different scale than the HTTP API so it cannot
-            // be trusted for display. Only dispatch muted (a reliable boolean).
+            const update = {};
+            if (msg.volume !== undefined)
+                update.volume = msg.volume;
             if (msg.muted !== undefined)
-                notify({ muted: msg.muted });
+                update.muted = msg.muted;
+            if (Object.keys(update).length > 0)
+                notify(update);
             break;
         }
         case 'REPEAT_CHANGED':
@@ -376,11 +379,87 @@ function MdRepeatOne (props) {
   return GenIcon({"attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"fill":"none","d":"M0 0h24v24H0z"},"child":[]},{"tag":"path","attr":{"d":"M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"},"child":[]}]})(props);
 }
 
+// How often to poll YTM for the current volume.
+// Keeps the slider in sync whether or not the component remounts.
+const POLL_MS = 2000;
+// After the user moves the slider, suppress poll updates for this long
+// so the slider doesn't jump back while the API call is in flight.
+const USER_ADJUST_GRACE_MS = 1500;
+const PaddedSlider = (props) => {
+    const ref = SP_REACT.useRef(null);
+    SP_REACT.useEffect(() => {
+        if (!ref.current)
+            return;
+        const firstChild = ref.current.firstElementChild;
+        if (firstChild) {
+            firstChild.style.paddingLeft = '19px';
+            firstChild.style.paddingRight = '19px';
+        }
+        ref.current.querySelectorAll('*').forEach((el) => {
+            if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
+                el.style.minWidth = '0';
+        });
+    }, []);
+    return (SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
+};
+const VolumeSlider = () => {
+    const [volume, setVolumeState] = SP_REACT.useState(null);
+    // True while the user is actively adjusting — poll won't overwrite their value.
+    const userAdjustingRef = SP_REACT.useRef(false);
+    const userAdjustTimerRef = SP_REACT.useRef(null);
+    const apiDebounceRef = SP_REACT.useRef(null);
+    const fetchVolume = SP_REACT.useCallback(async () => {
+        if (userAdjustingRef.current) {
+            console.log('[VolumeSlider] poll skipped — user is adjusting');
+            return;
+        }
+        console.log('[VolumeSlider] fetching volume from API');
+        const res = await getVolume();
+        if (res !== null) {
+            console.log('[VolumeSlider] got volume:', res.state, '| muted:', res.isMuted);
+            setVolumeState(res.state);
+        }
+        else {
+            console.log('[VolumeSlider] fetch returned null (API unreachable?)');
+        }
+    }, []);
+    SP_REACT.useEffect(() => {
+        console.log('[VolumeSlider] mount — starting poll every', POLL_MS, 'ms');
+        void fetchVolume();
+        const interval = setInterval(() => { void fetchVolume(); }, POLL_MS);
+        return () => {
+            console.log('[VolumeSlider] unmount — stopping poll');
+            clearInterval(interval);
+        };
+    }, [fetchVolume]);
+    const handleChange = (val) => {
+        setVolumeState(val);
+        // Mark user as adjusting so polls don't overwrite the slider.
+        userAdjustingRef.current = true;
+        if (userAdjustTimerRef.current)
+            clearTimeout(userAdjustTimerRef.current);
+        userAdjustTimerRef.current = setTimeout(() => {
+            userAdjustingRef.current = false;
+        }, USER_ADJUST_GRACE_MS);
+        // Debounce the actual API call.
+        if (apiDebounceRef.current)
+            clearTimeout(apiDebounceRef.current);
+        apiDebounceRef.current = setTimeout(() => {
+            console.log('[VolumeSlider] calling setVolume ->', val);
+            void setVolume(val);
+        }, 300);
+    };
+    if (volume === null) {
+        return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: 0, min: 0, max: 100, step: 1, onChange: () => { }, disabled: true, showValue: false }));
+    }
+    return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: volume, min: 0, max: 100, step: 1, onChange: handleChange, showValue: false }));
+};
+
 const REPEAT_NEXT = { NONE: 1, ALL: 1, ONE: 1 };
 const REPEAT_ICONS = {
-    NONE: SP_JSX.jsx(MdRepeat, { size: 16, style: { opacity: 0.4 } }),
-    ALL: SP_JSX.jsx(MdRepeat, { size: 16, style: { opacity: 1 } }),
-    ONE: SP_JSX.jsx(MdRepeatOne, { size: 16, style: { opacity: 1 } }),
+    NONE: SP_JSX.jsx(MdRepeat, { size: 18, style: { opacity: 0.4, margin: '-2px' } }),
+    ALL: SP_JSX.jsx(MdRepeat, { size: 18, style: { opacity: 1, margin: '-2px' } }),
+    ONE: SP_JSX.jsx(MdRepeatOne, { size: 18, style: { opacity: 1, margin: '-2px' } }),
 };
 const REPEAT_LABELS = {
     NONE: 'Off',
@@ -403,8 +482,8 @@ const rowBtnLast = { ...rowBtnBase, borderRadius: '0 4px 4px 0', borderLeft: '1p
 // Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el) => {
-    el.style.paddingLeft = '16px';
-    el.style.paddingRight = '16px';
+    el.style.paddingLeft = '19px';
+    el.style.paddingRight = '19px';
 };
 const PaddedToggle = (props) => {
     const ref = SP_REACT.useRef(null);
@@ -415,87 +494,8 @@ const PaddedToggle = (props) => {
     }, []);
     return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ToggleField, { ...props }) });
 };
-const PaddedSlider = (props) => {
-    const ref = SP_REACT.useRef(null);
-    SP_REACT.useEffect(() => {
-        if (!ref.current)
-            return;
-        const firstChild = ref.current.firstElementChild;
-        if (firstChild) {
-            firstChild.style.paddingLeft = '19px';
-            firstChild.style.paddingRight = '19px';
-        }
-        ref.current.querySelectorAll('*').forEach((el) => {
-            if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
-                el.style.minWidth = '0';
-        });
-    }, []);
-    return (SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
-};
-// Persists across remounts (QAP close/reopen). Tracks the last value the user
-// explicitly set via the slider. null = user has never touched it, safe to
-// fetch from the API. Cleared on WS disconnect so a YTM restart re-fetches
-// the fresh player volume.
-let _lastUserVolume = null;
 const PlayerView = () => {
-    const { song, isPlaying, volume, shuffle: isShuffled, repeat, connected } = usePlayer();
-    // Seed from the user's last-set value on remount; fall back to context.
-    const [displayVolume, setDisplayVolume] = SP_REACT.useState(() => _lastUserVolume ?? volume);
-    const adjustingRef = SP_REACT.useRef(false);
-    const cooldownTimer = SP_REACT.useRef(null);
-    const debounceTimer = SP_REACT.useRef(null);
-    const wasConnectedRef = SP_REACT.useRef(false);
-    // Only fetch from the API when the user hasn't set a value yet.
-    // getVolume() returns the player's internal scale which differs from the
-    // 0-100 linear scale setVolume() accepts — so we must never call it after
-    // the user has touched the slider.
-    const fetchVolume = SP_REACT.useCallback(() => {
-        if (_lastUserVolume !== null)
-            return;
-        void getVolume().then((res) => {
-            if (res !== null && !adjustingRef.current) {
-                setDisplayVolume(res.state);
-            }
-        });
-    }, []);
-    // Clear the user-set cache only on a true connected→disconnected transition
-    // (e.g. YTM restart). Guarded by wasConnectedRef so the initial mount with
-    // connected=false does NOT wipe the persisted user value.
-    SP_REACT.useEffect(() => {
-        if (connected) {
-            wasConnectedRef.current = true;
-        }
-        else if (wasConnectedRef.current) {
-            _lastUserVolume = null;
-        }
-    }, [connected]);
-    // Fetch on mount — covers the !Tabs fallback remount case.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    SP_REACT.useEffect(() => { if (connected)
-        fetchVolume(); }, []);
-    // Fetch on connect/reconnect (e.g. after YTM restart).
-    SP_REACT.useEffect(() => { if (connected)
-        fetchVolume(); }, [connected, fetchVolume]);
-    // Cleanup timers on unmount.
-    SP_REACT.useEffect(() => () => {
-        if (cooldownTimer.current)
-            clearTimeout(cooldownTimer.current);
-        if (debounceTimer.current)
-            clearTimeout(debounceTimer.current);
-    }, []);
-    const handleVolumeChange = (val) => {
-        _lastUserVolume = val;
-        setDisplayVolume(val);
-        adjustingRef.current = true;
-        // Keep adjustingRef true for 1500ms so the mount-time getVolume() fetch
-        // and any volume WebSocket sync don't overwrite the user's in-flight value.
-        if (cooldownTimer.current)
-            clearTimeout(cooldownTimer.current);
-        cooldownTimer.current = setTimeout(() => { adjustingRef.current = false; }, 1500);
-        if (debounceTimer.current)
-            clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(() => { void setVolume(val); }, 300);
-    };
+    const { song, isPlaying, shuffle: isShuffled, repeat } = usePlayer();
     const albumArt = song?.albumArt;
     const title = song?.title ?? 'Nothing playing';
     const artist = song?.artist ?? '';
@@ -504,7 +504,7 @@ const PlayerView = () => {
                                 background: 'rgba(255,255,255,0.08)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--gpSystemLighterGrey)',
-                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleVolumeChange, showValue: false }) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 12 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', paddingRight: '16px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
+                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(FaStepBackward, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(FaPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(FaStepForward, {}) })] }), SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: rowBtnFirst, onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: rowBtnLast, onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(FaStepBackward, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(FaStepForward, {}), " Next"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void like(); }, children: SP_JSX.jsx(FaThumbsUp, {}) }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void dislike(); }, children: SP_JSX.jsx(FaThumbsDown, {}) })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(VolumeSlider, {}) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 14 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '19px', paddingRight: '19px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
 };
 
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??
@@ -552,7 +552,7 @@ const QueueView = () => {
                                 textAlign: 'left',
                                 height: 'auto',
                                 minHeight: '44px',
-                                padding: '8px 16px',
+                                padding: '10px 19px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'center',

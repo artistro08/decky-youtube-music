@@ -102,10 +102,10 @@ const handleMessage = (msg: WSMessage): void => {
       notify({ position: msg.position ?? 0 });
       break;
     case 'VOLUME_CHANGED': {
-      const volUpdate: Partial<PlayerState> = {};
-      if (msg.volume !== undefined) volUpdate.volume = msg.volume;
-      if (msg.muted !== undefined) volUpdate.muted = msg.muted;
-      notify(volUpdate);
+      const update: Partial<PlayerState> = {};
+      if (msg.volume !== undefined) update.volume = msg.volume;
+      if (msg.muted !== undefined) update.muted = msg.muted;
+      if (Object.keys(update).length > 0) notify(update);
       break;
     }
     case 'REPEAT_CHANGED':
