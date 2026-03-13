@@ -41,6 +41,7 @@ No new files. No changes to context, services, or types.
 
 **Fix:**
 - Replace `PaddedButton` with a `Focusable` + `DialogButton` (consistent with transport controls, full width by default).
+- Replace the Repeat button JSX first (so `PaddedButton` is no longer referenced), then **delete the `PaddedButton` component definition** from `PlayerView.tsx`. Order matters: deleting the definition before replacing the JSX reference will break the build mid-task.
 - Add `REPEAT_LABELS: Record<string, string> = { NONE: 'Off', ALL: 'All', ONE: 'One' }`.
 - Button content: `[icon] Repeat: [label]` rendered as a flex row with a gap.
 - `DialogButton` style: `height: '30px'`, `display: 'flex'`, `alignItems: 'center'`, `justifyContent: 'flex-start'`, `gap: '6px'`, `paddingLeft: '12px'`.
@@ -85,6 +86,9 @@ Button render:
 **Current:** `PaddedButton` wrapping a `ButtonItem`, not full width.
 
 **Fix:** Same approach as repeat button — replace with `Focusable` + `DialogButton` with matching style.
+- **Delete the `PaddedButton` component definition** from `QueueView.tsx` — it will no longer be used.
+- **Remove the `ButtonItem` import** from `QueueView.tsx` — it was only used inside `PaddedButton`. Both are dead code after the replacement and will cause build failures (`noUnusedLocals: true`).
+- No `DialogButton` availability fallback is needed for the Clear Queue button — the existing queue item rows already handle the `if (DialogButton)` guard; the Clear Queue button can use `DialogButton` unconditionally consistent with the current pattern.
 
 ```tsx
 <Focusable>
