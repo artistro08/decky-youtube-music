@@ -11,14 +11,13 @@ Add a settings page to the decky-youtube-music plugin that supports the YouTube 
 
 ### New Files
 
-- **`src/components/SettingsView.tsx`** — Full-page settings route component. Contains the auto-auth button (with loading/success/error states) and the manual token input form.
-- **`src/services/authService.ts`** — Encapsulates the `POST /auth/{id}` request with a 60-second timeout, returning the access token or throwing on failure.
+- **`src/components/SettingsView.tsx`** — Full-page settings route component. Contains the auto-auth button (with loading/success/error states) and the manual token input form. Rendered outside `PlayerProvider` — reads token presence directly from `getToken()` (localStorage) rather than from PlayerContext.
 
 ### Modified Files
 
 - **`src/index.tsx`** — Register `/youtube-music/settings` route via `routerHook.addRoute()`. Replace the current plain `titleView` div with a `Focusable` containing the "YouTube Music" title and a gear `DialogButton` that navigates to the settings route.
-- **`src/services/apiClient.ts`** — Add `requestAuth(id: string): Promise<string>` that calls `POST /auth/{id}` and returns the `accessToken` from the response, or throws on `403` / network error.
-- **`src/components/AuthTokenView.tsx`** — Simplify to a single "Open Settings" button (removes the inline token input). Clicking it calls `Navigation.Navigate('/youtube-music/settings')` and `Navigation.CloseSideMenus()`.
+- **`src/services/apiClient.ts`** — Add `requestAuth(id: string): Promise<string>` that calls `POST /auth/{id}` using a bare `fetch()` (no `Authorization` header — this is the call that obtains a token, so sending a stale/missing token would be incorrect). Returns the `accessToken` string on 200, throws a `DeniedError` on 403, and throws on network errors.
+- **`src/components/AuthTokenView.tsx`** — Simplify to a single "Open Settings" button. Remove the inline token input (it now lives in the settings page). Clicking calls `Navigation.Navigate('/youtube-music/settings')` and `Navigation.CloseSideMenus()`.
 
 ## Auth Flow
 
@@ -36,12 +35,22 @@ Fixed string `"decky-youtube-music"`. The YTM server stores authorized IDs in `a
 
 ### Request Authorization Button States
 
-1. **Idle** — "Request Authorization" button enabled
-2. **Pending** — Button disabled, shows "Waiting for approval..." spinner. The POST request blocks while the desktop dialog is open.
-3. **Success** — Shows "Authorized!" briefly, then reconnects WebSocket with the new token
-4. **Denied (403)** — Shows "Denied — try again" in red, button re-enabled
-5. **Timeout (60s)** — Shows "Timed out — try again" in red, button re-enabled
-6. **Network error** — Shows "Could not reach YouTube Music" in red, button re-enabled
+1. **Idle** — "Request Authorization" button enabled. Shown whether or not a token already exists — clicking when already authorized simply obtains a fresh token silently (harmless, no dialog shown).
+2. **Pending** — Button disabled, shows "Waiting for approval..." with a spinner. The POST request blocks while the desktop dialog is open.
+3. **Success** — Shows "Authorized!" briefly, then saves token and reconnects WebSocket.
+4. **Denied (403)** — Shows "Denied — try again" in red, button re-enabled.
+5. **Timeout (60s)** — Shows "Timed out — try again" in red, button re-enabled.
+6. **Network error** — Shows "Could not reach YouTube Music" in red, button re-enabled.
+
+### Reconnect After Auth
+
+On successful auth:
+
+```
+setToken(accessToken) → disconnect() → setTimeout(resetAndConnect, 100)
+```
+
+The 100ms delay matches the existing pattern in `AuthTokenView.tsx` and avoids a race where `socket.close()` has not yet fired `onclose` before `resetAndConnect()` is called.
 
 ## Settings Page Layout
 
@@ -50,7 +59,9 @@ Fixed string `"decky-youtube-music"`. The YTM server stores authorized IDs in `a
 │ ← YouTube Music Settings            │
 ├─────────────────────────────────────┤
 │ CONNECTION                          │
-│  Status: ● Connected / ✗ No token   │
+│  Status: ● Token saved / ✗ No token │
+│  (based on localStorage — not live  │
+│   WebSocket state)                  │
 │                                     │
 │ AUTHORIZATION                       │
 │  [Request Authorization]            │
@@ -67,28 +78,31 @@ Fixed string `"decky-youtube-music"`. The YTM server stores authorized IDs in `a
 └─────────────────────────────────────┘
 ```
 
+**Status indicator:** Reads from `getToken()` at render time and after any save/clear action. Shows "● Token saved" (green dot) if a token exists in localStorage, "✗ No token" (grey/red) otherwise. Does not reflect live WebSocket connection state — the settings page is a standalone route outside `PlayerProvider`.
+
 ## Title Bar Gear Button
 
 - Pattern follows CSS Loader's `TitleView` component
 - `titleView` in `definePlugin` renders a `Focusable` with:
   - Left: "YouTube Music" title text
   - Right: `DialogButton` with `BsGearFill` icon (28px height, 40px width, no min-width)
-- On click: `Navigation.Navigate('/youtube-music/settings')` → `Navigation.CloseSideMenus()`
+- On click: `Navigation.Navigate('/youtube-music/settings')` then `Navigation.CloseSideMenus()`
 
 ## Token Lifecycle
 
 - Storage key unchanged: `ytmusic_api_token` in `localStorage`
-- On successful auth request: `setToken(accessToken)` → `disconnect()` → `resetAndConnect()`
-- On clear: `clearToken()` → `disconnect()` → `resetAndConnect()` — server returns 401, `AuthTokenView` appears
+- On successful auth request: `setToken(accessToken)` → `disconnect()` → `setTimeout(resetAndConnect, 100)`
+- On clear: `clearToken()` → `disconnect()` → `setTimeout(resetAndConnect, 100)` — server returns 401, `AuthTokenView` appears in the panel
 - No auto-request on startup — user must explicitly visit settings and click the button
 
 ## AuthTokenView (on 401)
 
-Simplified to a single action: one "Open Settings" button. Removes the inline token input. Text explains that the API server requires authorization and directs the user to settings.
+Simplified to a message and a single "Open Settings" button. Removes the inline token input. Text explains that the API server requires authorization and directs the user to settings.
 
 ## Error Handling
 
-- **60-second client timeout** on the `POST /auth/{id}` request via `AbortController`
+- **60-second client timeout** on `POST /auth/{id}` via `AbortController`
 - `403` response → denied state
+- `AbortError` → timeout state
 - Network/fetch error → network error state
-- All error states re-enable the button so the user can retry
+- All error states re-enable the "Request Authorization" button for retry
