@@ -3,9 +3,7 @@ import { useEffect, useState } from 'react';
 import { usePlayer } from '../context/PlayerContext';
 import {
   clearQueue,
-  dislike,
   getQueue,
-  like,
   next,
   previous,
   removeFromQueue,
@@ -143,21 +141,12 @@ export const MainView = () => {
               </DialogButton>
               <DialogButton style={rowBtn} onClick={() => { void next(); }}>⏭</DialogButton>
             </Focusable>
-            <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
-              flow-children="horizontal"
-            >
-              <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}>👍 Like</DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void dislike(); }}>👎 Dislike</DialogButton>
-            </Focusable>
           </>
         ) : (
           <>
             <ButtonItem onClick={() => { void previous(); }}>⏮ Previous</ButtonItem>
             <ButtonItem onClick={() => { void togglePlay(); }}>{isPlaying ? '⏸ Pause' : '▶ Play'}</ButtonItem>
             <ButtonItem onClick={() => { void next(); }}>⏭ Next</ButtonItem>
-            <ButtonItem onClick={() => { void like(); }}>👍 Like</ButtonItem>
-            <ButtonItem onClick={() => { void dislike(); }}>👎 Dislike</ButtonItem>
           </>
         )}
       </Section>

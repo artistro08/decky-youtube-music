@@ -79,8 +79,6 @@ export const setVolume = (volume: number) => post('/volume', { volume });
 export const toggleMute = () => post('/toggle-mute');
 export const shuffle = () => post('/shuffle');
 export const switchRepeat = (iteration: number) => post('/switch-repeat', { iteration });
-export const like = () => post('/like');
-export const dislike = () => post('/dislike');
 
 // Song & state
 export const getSongInfo = async (): Promise<SongInfo | null> => {

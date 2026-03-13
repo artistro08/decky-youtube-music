@@ -1,20 +1,16 @@
 import { ButtonItem, DialogButton, Focusable, ToggleField } from '@decky/ui';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { FaPause, FaRandom, FaMusic } from 'react-icons/fa';
 import { IoPlay, IoPlaySkipBack, IoPlaySkipForward } from 'react-icons/io5';
-import { VscThumbsup, VscThumbsupFilled, VscThumbsdown, VscThumbsdownFilled } from 'react-icons/vsc';
 import { MdRepeat, MdRepeatOne } from 'react-icons/md';
 import { usePlayer } from '../context/PlayerContext';
 import {
-  dislike,
-  like,
   next,
   previous,
   shuffle,
   switchRepeat,
   togglePlay,
 } from '../services/apiClient';
-import type { SongInfo } from '../types';
 import { Section } from './Section';
 import { VolumeSlider } from './VolumeSlider';
 
@@ -31,7 +27,7 @@ const REPEAT_LABELS: Record<string, string> = {
   ONE:  'One',
 };
 
-const rowBtnBase: React.CSSProperties = {
+const btnBase: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -41,12 +37,9 @@ const rowBtnBase: React.CSSProperties = {
   marginLeft: '0',
 };
 
-const rowBtnFirst: React.CSSProperties = { ...rowBtnBase, height: '30px', borderRadius: '4px 0 0 4px' };
-const rowBtnLast: React.CSSProperties  = { ...rowBtnBase, height: '30px', borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
-
-const transBtnFirst: React.CSSProperties = { ...rowBtnBase, height: '35px', borderRadius: '4px 0 0 4px' };
-const transBtnMid: React.CSSProperties   = { ...rowBtnBase, height: '35px', borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
-const transBtnLast: React.CSSProperties  = { ...rowBtnBase, height: '35px', borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const transBtnFirst: React.CSSProperties = { ...btnBase, height: '35px', borderRadius: '4px 0 0 4px' };
+const transBtnMid: React.CSSProperties   = { ...btnBase, height: '35px', borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const transBtnLast: React.CSSProperties  = { ...btnBase, height: '35px', borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
 
 // Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
@@ -54,7 +47,6 @@ const applyInnerPadding = (el: HTMLElement) => {
   el.style.paddingLeft = '19px';
   el.style.paddingRight = '19px';
 };
-
 
 const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -65,45 +57,8 @@ const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
   return <div ref={ref}><ToggleField {...props} /></div>;
 };
 
-// Module-level cache — survives tab switches (component remounts).
-let cachedLikeStatus: SongInfo['likeStatus'] = undefined;
-let cachedLikeVideoId: string | undefined = undefined;
-// True after user clicks like/dislike; reset on song change.
-// Prevents server re-dispatch from overriding an optimistic update.
-let hasOptimisticUpdate = false;
-
 export const PlayerView = () => {
   const { song, isPlaying, shuffle: isShuffled, repeat } = usePlayer();
-
-  // Initialise from cache so remounts (tab switches) show the last known value.
-  const [likeStatus, setLikeStatus] = useState<SongInfo['likeStatus']>(cachedLikeStatus);
-
-  useEffect(() => {
-    if (song?.videoId !== cachedLikeVideoId) {
-      // New song — reset everything and load fresh likeStatus.
-      cachedLikeVideoId = song?.videoId;
-      cachedLikeStatus = song?.likeStatus;
-      hasOptimisticUpdate = false;
-      setLikeStatus(song?.likeStatus);
-    } else if (!hasOptimisticUpdate) {
-      // Same song, server sent updated likeStatus, no user override — apply it.
-      cachedLikeStatus = song?.likeStatus;
-      setLikeStatus(song?.likeStatus);
-    }
-  }, [song?.videoId, song?.likeStatus]);
-
-  const handleLike = () => {
-    hasOptimisticUpdate = true;
-    cachedLikeStatus = 'LIKE';
-    setLikeStatus('LIKE');
-    void like();
-  };
-  const handleDislike = () => {
-    hasOptimisticUpdate = true;
-    cachedLikeStatus = 'DISLIKE';
-    setLikeStatus('DISLIKE');
-    void dislike();
-  };
 
   const albumArt = song?.albumArt;
   const title = song?.title ?? 'Nothing playing';
@@ -149,40 +104,21 @@ export const PlayerView = () => {
       <div style={{ marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }}>
       <Section noPull>
         {DialogButton ? (
-          <>
-            <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
-              flow-children="horizontal"
-            >
-              <DialogButton style={transBtnFirst} onClick={() => { void previous(); }}><IoPlaySkipBack /></DialogButton>
-              <DialogButton style={transBtnMid} onClick={() => { void togglePlay(); }}>
-                {isPlaying ? <FaPause /> : <IoPlay />}
-              </DialogButton>
-              <DialogButton style={transBtnLast} onClick={() => { void next(); }}><IoPlaySkipForward /></DialogButton>
-            </Focusable>
-            <Focusable
-              style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
-              flow-children="horizontal"
-            >
-              <DialogButton style={rowBtnFirst} onClick={handleLike}>
-                {likeStatus === 'LIKE' ? <VscThumbsupFilled /> : <VscThumbsup />}
-              </DialogButton>
-              <DialogButton style={rowBtnLast} onClick={handleDislike}>
-                {likeStatus === 'DISLIKE' ? <VscThumbsdownFilled /> : <VscThumbsdown />}
-              </DialogButton>
-            </Focusable>
-          </>
+          <Focusable
+            style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
+            flow-children="horizontal"
+          >
+            <DialogButton style={transBtnFirst} onClick={() => { void previous(); }}><IoPlaySkipBack /></DialogButton>
+            <DialogButton style={transBtnMid} onClick={() => { void togglePlay(); }}>
+              {isPlaying ? <FaPause /> : <IoPlay />}
+            </DialogButton>
+            <DialogButton style={transBtnLast} onClick={() => { void next(); }}><IoPlaySkipForward /></DialogButton>
+          </Focusable>
         ) : (
           <>
             <ButtonItem onClick={() => { void previous(); }}><IoPlaySkipBack /> Previous</ButtonItem>
             <ButtonItem onClick={() => { void togglePlay(); }}>{isPlaying ? <><FaPause /> Pause</> : <><IoPlay /> Play</>}</ButtonItem>
             <ButtonItem onClick={() => { void next(); }}><IoPlaySkipForward /> Next</ButtonItem>
-            <ButtonItem onClick={handleLike}>
-              {likeStatus === 'LIKE' ? <VscThumbsupFilled /> : <VscThumbsup />}
-            </ButtonItem>
-            <ButtonItem onClick={handleDislike}>
-              {likeStatus === 'DISLIKE' ? <VscThumbsdownFilled /> : <VscThumbsdown />}
-            </ButtonItem>
           </>
         )}
       </Section>

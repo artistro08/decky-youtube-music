@@ -23,12 +23,12 @@ const reducer = (state: PlayerState, action: Action): PlayerState => {
   if (action.type === 'UPDATE') return { ...state, ...action.payload };
   if (action.type === 'SUPPLEMENT_SONG') {
     const existing = state.song;
-    // No existing song — use HTTP data as-is (likeStatus will arrive via WS later).
+    // No existing song — use HTTP data as-is.
     if (!existing) return { ...state, song: action.payload };
     // Stale response for a different video (race condition) — ignore.
     if (existing.videoId !== action.payload.videoId) return state;
     // Same song — merge: HTTP fills in fields WS omitted (e.g. albumArt),
-    // but does NOT overwrite fields WS already provided (e.g. likeStatus).
+    // but does NOT overwrite fields WS already provided.
     const merged: SongInfo = { ...existing };
     (Object.keys(action.payload) as Array<keyof SongInfo>).forEach((k) => {
       const v = action.payload[k];
