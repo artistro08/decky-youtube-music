@@ -1,5 +1,5 @@
 import { ButtonItem, PanelSection, PanelSectionRow, TextField } from '@decky/ui';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getToken, setToken, clearToken, requestAuth } from '../services/apiClient';
 import { disconnect, resetAndConnect } from '../services/websocketService';
 
@@ -20,6 +20,11 @@ export const SettingsView = () => {
   const [authState, setAuthState] = useState<AuthState>('idle');
   const [manualToken, setManualToken] = useState('');
   const [hasToken, setHasToken] = useState(() => !!getToken());
+  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (successTimer.current) clearTimeout(successTimer.current);
+  }, []);
 
   const reconnect = (token: string) => {
     setToken(token);
@@ -34,7 +39,7 @@ export const SettingsView = () => {
       reconnect(token);
       setHasToken(true);
       setAuthState('success');
-      setTimeout(() => setAuthState('idle'), 2000);
+      successTimer.current = setTimeout(() => setAuthState('idle'), 2000);
     } catch (e: unknown) {
       if (e instanceof Error && e.name === 'AbortError') {
         setAuthState('timeout');
