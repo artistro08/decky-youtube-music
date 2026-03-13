@@ -379,9 +379,12 @@ function MdRepeatOne (props) {
   return GenIcon({"attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"fill":"none","d":"M0 0h24v24H0z"},"child":[]},{"tag":"path","attr":{"d":"M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"},"child":[]}]})(props);
 }
 
-// After the user moves the slider, suppress context sync for this long
+// After the user moves the slider, suppress re-fetch for this long
 // so the slider doesn't jump while the API call is in flight.
 const USER_ADJUST_GRACE_MS = 1500;
+// Module-level cache — survives tab switches (component remounts) so the
+// slider shows the last known value immediately instead of flashing to 0.
+let cachedVolume = null;
 const PaddedSlider = (props) => {
     const ref = SP_REACT.useRef(null);
     SP_REACT.useEffect(() => {
@@ -400,17 +403,25 @@ const PaddedSlider = (props) => {
     return (SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
 };
 const VolumeSlider = () => {
-    const { volume: contextVolume, connected } = usePlayer();
-    const [displayVolume, setDisplayVolume] = SP_REACT.useState(contextVolume);
+    const { connected } = usePlayer();
+    // Initialise from cache so remounts show the last known value instantly.
+    const [displayVolume, setDisplayVolume] = SP_REACT.useState(cachedVolume);
     const userAdjustingRef = SP_REACT.useRef(false);
     const userAdjustTimerRef = SP_REACT.useRef(null);
     const apiDebounceRef = SP_REACT.useRef(null);
-    // Sync from context whenever it changes, unless the user is mid-adjust.
+    // Fetch the real volume from YTM via HTTP whenever we (re)connect.
+    // HTTP GET /volume is the only reliable source — WS volume events can carry
+    // stale or differently-scaled values and must not drive the display directly.
     SP_REACT.useEffect(() => {
-        if (!userAdjustingRef.current) {
-            setDisplayVolume(contextVolume);
-        }
-    }, [contextVolume]);
+        if (!connected)
+            return;
+        void getVolume().then((res) => {
+            if (res !== null) {
+                cachedVolume = res.state;
+                setDisplayVolume(res.state);
+            }
+        });
+    }, [connected]);
     // Clear pending timers on unmount to avoid stale callbacks.
     SP_REACT.useEffect(() => {
         return () => {
@@ -422,16 +433,19 @@ const VolumeSlider = () => {
     }, []);
     const handleChange = SP_REACT.useCallback((val) => {
         setDisplayVolume(val);
-        // Suppress context sync while adjusting.
+        cachedVolume = val; // keep cache in sync so remounts reflect the drag
+        // Suppress the post-drag re-fetch while the user is still moving.
         userAdjustingRef.current = true;
         if (userAdjustTimerRef.current)
             clearTimeout(userAdjustTimerRef.current);
         userAdjustTimerRef.current = setTimeout(() => {
             userAdjustingRef.current = false;
-            // One-shot re-fetch to confirm the value if YTM doesn't echo back via WS.
+            // Confirm the settled value via HTTP once the grace period expires.
             void getVolume().then((res) => {
-                if (res !== null)
+                if (res !== null) {
+                    cachedVolume = res.state;
                     setDisplayVolume(res.state);
+                }
             });
         }, USER_ADJUST_GRACE_MS);
         // Debounce the actual API call.
@@ -441,7 +455,7 @@ const VolumeSlider = () => {
             void setVolume(val);
         }, 300);
     }, []);
-    return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleChange, showValue: false, disabled: !connected }));
+    return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume ?? 0, min: 0, max: 100, step: 1, onChange: handleChange, showValue: false, disabled: !connected || displayVolume === null }));
 };
 
 const REPEAT_NEXT = { NONE: 1, ALL: 1, ONE: 1 };

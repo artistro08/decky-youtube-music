@@ -5,9 +5,13 @@ import { FaVolumeUp } from 'react-icons/fa';
 import { getVolume, setVolume } from '../services/apiClient';
 import { usePlayer } from '../context/PlayerContext';
 
-// After the user moves the slider, suppress context sync for this long
+// After the user moves the slider, suppress re-fetch for this long
 // so the slider doesn't jump while the API call is in flight.
 const USER_ADJUST_GRACE_MS = 1500;
+
+// Module-level cache — survives tab switches (component remounts) so the
+// slider shows the last known value immediately instead of flashing to 0.
+let cachedVolume: number | null = null;
 
 const PaddedSlider = (props: SliderFieldProps) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,19 +35,26 @@ const PaddedSlider = (props: SliderFieldProps) => {
 };
 
 export const VolumeSlider = () => {
-  const { volume: contextVolume, connected } = usePlayer();
-  const [displayVolume, setDisplayVolume] = useState<number>(contextVolume);
+  const { connected } = usePlayer();
+  // Initialise from cache so remounts show the last known value instantly.
+  const [displayVolume, setDisplayVolume] = useState<number | null>(cachedVolume);
 
   const userAdjustingRef = useRef(false);
   const userAdjustTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const apiDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync from context whenever it changes, unless the user is mid-adjust.
+  // Fetch the real volume from YTM via HTTP whenever we (re)connect.
+  // HTTP GET /volume is the only reliable source — WS volume events can carry
+  // stale or differently-scaled values and must not drive the display directly.
   useEffect(() => {
-    if (!userAdjustingRef.current) {
-      setDisplayVolume(contextVolume);
-    }
-  }, [contextVolume]);
+    if (!connected) return;
+    void getVolume().then((res) => {
+      if (res !== null) {
+        cachedVolume = res.state;
+        setDisplayVolume(res.state);
+      }
+    });
+  }, [connected]);
 
   // Clear pending timers on unmount to avoid stale callbacks.
   useEffect(() => {
@@ -55,15 +66,19 @@ export const VolumeSlider = () => {
 
   const handleChange = useCallback((val: number) => {
     setDisplayVolume(val);
+    cachedVolume = val; // keep cache in sync so remounts reflect the drag
 
-    // Suppress context sync while adjusting.
+    // Suppress the post-drag re-fetch while the user is still moving.
     userAdjustingRef.current = true;
     if (userAdjustTimerRef.current) clearTimeout(userAdjustTimerRef.current);
     userAdjustTimerRef.current = setTimeout(() => {
       userAdjustingRef.current = false;
-      // One-shot re-fetch to confirm the value if YTM doesn't echo back via WS.
+      // Confirm the settled value via HTTP once the grace period expires.
       void getVolume().then((res) => {
-        if (res !== null) setDisplayVolume(res.state);
+        if (res !== null) {
+          cachedVolume = res.state;
+          setDisplayVolume(res.state);
+        }
       });
     }, USER_ADJUST_GRACE_MS);
 
@@ -77,13 +92,13 @@ export const VolumeSlider = () => {
   return (
     <PaddedSlider
       icon={<FaVolumeUp size={18} />}
-      value={displayVolume}
+      value={displayVolume ?? 0}
       min={0}
       max={100}
       step={1}
       onChange={handleChange}
       showValue={false}
-      disabled={!connected}
+      disabled={!connected || displayVolume === null}
     />
   );
 };
