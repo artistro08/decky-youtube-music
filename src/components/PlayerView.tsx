@@ -1,7 +1,7 @@
 import { ButtonItem, DialogButton, Focusable, SliderField, ToggleField } from '@decky/ui';
 import type { SliderFieldProps } from '@decky/ui';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaStepBackward, FaPlay, FaPause, FaStepForward, FaThumbsUp, FaThumbsDown, FaVolumeUp, FaRandom } from 'react-icons/fa';
+import { FaStepBackward, FaPlay, FaPause, FaStepForward, FaThumbsUp, FaThumbsDown, FaVolumeUp, FaRandom, FaMusic } from 'react-icons/fa';
 import { MdRepeat, MdRepeatOne } from 'react-icons/md';
 import { usePlayer } from '../context/PlayerContext';
 import {
@@ -10,7 +10,6 @@ import {
   like,
   next,
   previous,
-  seekTo,
   setVolume,
   shuffle,
   switchRepeat,
@@ -31,8 +30,7 @@ const REPEAT_LABELS: Record<string, string> = {
   ONE:  'One',
 };
 
-const rowBtnFirst: React.CSSProperties = {
-  marginLeft: '0px',
+const rowBtnBase: React.CSSProperties = {
   height: '30px',
   display: 'flex',
   alignItems: 'center',
@@ -40,18 +38,12 @@ const rowBtnFirst: React.CSSProperties = {
   minWidth: '0',
   flex: 1,
   padding: '0 8px',
+  marginLeft: '0',
 };
 
-const rowBtn: React.CSSProperties = {
-  marginLeft: '5px',
-  height: '30px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minWidth: '0',
-  flex: 1,
-  padding: '0 8px',
-};
+const rowBtnFirst: React.CSSProperties = { ...rowBtnBase, borderRadius: '4px 0 0 4px' };
+const rowBtnMid: React.CSSProperties   = { ...rowBtnBase, borderRadius: '0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
+const rowBtnLast: React.CSSProperties  = { ...rowBtnBase, borderRadius: '0 4px 4px 0', borderLeft: '1px solid rgba(255,255,255,0.15)' };
 
 // Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
@@ -98,7 +90,7 @@ const PaddedSlider = (props: SliderFieldProps) => {
 let _lastUserVolume: number | null = null;
 
 export const PlayerView = () => {
-  const { song, isPlaying, volume, shuffle: isShuffled, repeat, position, connected } = usePlayer();
+  const { song, isPlaying, volume, shuffle: isShuffled, repeat, connected } = usePlayer();
 
   // Seed from the user's last-set value on remount; fall back to context.
   const [displayVolume, setDisplayVolume] = useState(() => _lastUserVolume ?? volume);
@@ -161,40 +153,45 @@ export const PlayerView = () => {
   const albumArt = song?.albumArt;
   const title = song?.title ?? 'Nothing playing';
   const artist = song?.artist ?? '';
-  const duration = song?.songDuration ?? 0;
 
   return (
     <>
-      {/* Album art */}
-      {albumArt && (
-        <Section>
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+      {/* Track info: album art + title/artist */}
+      {/* Note: Section applies margin: '0 -10px'. The 12px horizontal padding here
+          restores alignment (10px offset + 2px visual inset). Do not remove it. */}
+      <Section>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 12px' }}>
+          {albumArt ? (
             <img
               src={albumArt}
               alt="Album art"
-              style={{ width: '100%', maxWidth: '180px', borderRadius: '8px' }}
+              style={{ width: '72px', height: '72px', borderRadius: '4px', objectFit: 'cover', flexShrink: 0 }}
             />
+          ) : (
+            <div style={{
+              width: '72px', height: '72px', borderRadius: '4px', flexShrink: 0,
+              background: 'rgba(255,255,255,0.08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--gpSystemLighterGrey)',
+            }}>
+              <FaMusic size={36} />
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+            <div style={{ fontWeight: 'bold', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {title}
+            </div>
+            {artist && (
+              <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {artist}
+              </div>
+            )}
           </div>
-        </Section>
-      )}
-
-      {/* Track info + progress bar */}
-      {duration > 0 && (
-        <Section>
-          <PaddedSlider
-            label={artist ? `${title} / ${artist}` : title}
-            value={position}
-            min={0}
-            max={duration}
-            step={1}
-            onChange={(val) => { void seekTo(val); }}
-            showValue={false}
-          />
-        </Section>
-      )}
+        </div>
+      </Section>
 
       {/* Prev / Play / Next */}
-      <div style={{ marginTop: '10px' }}>
+      <div style={{ marginTop: '10px', marginBottom: '10px' }}>
       <Section noPull>
         {DialogButton ? (
           <>
@@ -203,17 +200,17 @@ export const PlayerView = () => {
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void previous(); }}><FaStepBackward /></DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void togglePlay(); }}>
+              <DialogButton style={rowBtnMid} onClick={() => { void togglePlay(); }}>
                 {isPlaying ? <FaPause /> : <FaPlay />}
               </DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void next(); }}><FaStepForward /></DialogButton>
+              <DialogButton style={rowBtnLast} onClick={() => { void next(); }}><FaStepForward /></DialogButton>
             </Focusable>
             <Focusable
               style={{ display: 'flex', marginTop: '4px', marginBottom: '4px' }}
               flow-children="horizontal"
             >
               <DialogButton style={rowBtnFirst} onClick={() => { void like(); }}><FaThumbsUp /></DialogButton>
-              <DialogButton style={rowBtn} onClick={() => { void dislike(); }}><FaThumbsDown /></DialogButton>
+              <DialogButton style={rowBtnLast} onClick={() => { void dislike(); }}><FaThumbsDown /></DialogButton>
             </Focusable>
           </>
         ) : (
@@ -231,7 +228,7 @@ export const PlayerView = () => {
       {/* Volume */}
       <Section>
         <PaddedSlider
-          icon={<FaVolumeUp size={14} />}
+          icon={<FaVolumeUp size={18} />}
           value={displayVolume}
           min={0}
           max={100}
