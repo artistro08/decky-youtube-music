@@ -45,6 +45,14 @@ export const VolumeSlider = () => {
     }
   }, [contextVolume]);
 
+  // Clear pending timers on unmount to avoid stale callbacks.
+  useEffect(() => {
+    return () => {
+      if (userAdjustTimerRef.current) clearTimeout(userAdjustTimerRef.current);
+      if (apiDebounceRef.current) clearTimeout(apiDebounceRef.current);
+    };
+  }, []);
+
   const handleChange = useCallback((val: number) => {
     setDisplayVolume(val);
 
