@@ -379,11 +379,8 @@ function MdRepeatOne (props) {
   return GenIcon({"attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"fill":"none","d":"M0 0h24v24H0z"},"child":[]},{"tag":"path","attr":{"d":"M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"},"child":[]}]})(props);
 }
 
-// How often to poll YTM for the current volume.
-// Keeps the slider in sync whether or not the component remounts.
-const POLL_MS = 2000;
-// After the user moves the slider, suppress poll updates for this long
-// so the slider doesn't jump back while the API call is in flight.
+// After the user moves the slider, suppress context sync for this long
+// so the slider doesn't jump while the API call is in flight.
 const USER_ADJUST_GRACE_MS = 1500;
 const PaddedSlider = (props) => {
     const ref = SP_REACT.useRef(null);
@@ -403,56 +400,48 @@ const PaddedSlider = (props) => {
     return (SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.SliderField, { ...props }) }));
 };
 const VolumeSlider = () => {
-    const [volume, setVolumeState] = SP_REACT.useState(null);
-    // True while the user is actively adjusting — poll won't overwrite their value.
+    const { volume: contextVolume, connected } = usePlayer();
+    const [displayVolume, setDisplayVolume] = SP_REACT.useState(contextVolume);
     const userAdjustingRef = SP_REACT.useRef(false);
     const userAdjustTimerRef = SP_REACT.useRef(null);
     const apiDebounceRef = SP_REACT.useRef(null);
-    const fetchVolume = SP_REACT.useCallback(async () => {
-        if (userAdjustingRef.current) {
-            console.log('[VolumeSlider] poll skipped — user is adjusting');
-            return;
-        }
-        console.log('[VolumeSlider] fetching volume from API');
-        const res = await getVolume();
-        if (res !== null) {
-            console.log('[VolumeSlider] got volume:', res.state, '| muted:', res.isMuted);
-            setVolumeState(res.state);
-        }
-        else {
-            console.log('[VolumeSlider] fetch returned null (API unreachable?)');
-        }
-    }, []);
+    // Sync from context whenever it changes, unless the user is mid-adjust.
     SP_REACT.useEffect(() => {
-        console.log('[VolumeSlider] mount — starting poll every', POLL_MS, 'ms');
-        void fetchVolume();
-        const interval = setInterval(() => { void fetchVolume(); }, POLL_MS);
+        if (!userAdjustingRef.current) {
+            setDisplayVolume(contextVolume);
+        }
+    }, [contextVolume]);
+    // Clear pending timers on unmount to avoid stale callbacks.
+    SP_REACT.useEffect(() => {
         return () => {
-            console.log('[VolumeSlider] unmount — stopping poll');
-            clearInterval(interval);
+            if (userAdjustTimerRef.current)
+                clearTimeout(userAdjustTimerRef.current);
+            if (apiDebounceRef.current)
+                clearTimeout(apiDebounceRef.current);
         };
-    }, [fetchVolume]);
-    const handleChange = (val) => {
-        setVolumeState(val);
-        // Mark user as adjusting so polls don't overwrite the slider.
+    }, []);
+    const handleChange = SP_REACT.useCallback((val) => {
+        setDisplayVolume(val);
+        // Suppress context sync while adjusting.
         userAdjustingRef.current = true;
         if (userAdjustTimerRef.current)
             clearTimeout(userAdjustTimerRef.current);
         userAdjustTimerRef.current = setTimeout(() => {
             userAdjustingRef.current = false;
+            // One-shot re-fetch to confirm the value if YTM doesn't echo back via WS.
+            void getVolume().then((res) => {
+                if (res !== null)
+                    setDisplayVolume(res.state);
+            });
         }, USER_ADJUST_GRACE_MS);
         // Debounce the actual API call.
         if (apiDebounceRef.current)
             clearTimeout(apiDebounceRef.current);
         apiDebounceRef.current = setTimeout(() => {
-            console.log('[VolumeSlider] calling setVolume ->', val);
             void setVolume(val);
         }, 300);
-    };
-    if (volume === null) {
-        return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: 0, min: 0, max: 100, step: 1, onChange: () => { }, disabled: true, showValue: false }));
-    }
-    return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: volume, min: 0, max: 100, step: 1, onChange: handleChange, showValue: false }));
+    }, []);
+    return (SP_JSX.jsx(PaddedSlider, { icon: SP_JSX.jsx(FaVolumeUp, { size: 18 }), value: displayVolume, min: 0, max: 100, step: 1, onChange: handleChange, showValue: false, disabled: !connected }));
 };
 
 const REPEAT_NEXT = { NONE: 1, ALL: 1, ONE: 1 };
