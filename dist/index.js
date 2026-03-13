@@ -579,11 +579,14 @@ const TabsContainer = () => {
     const [activeTab, setActiveTab] = SP_REACT.useState('player');
     const containerRef = SP_REACT.useRef(null);
     const [height, setHeight] = SP_REACT.useState(500);
-    // Height measurement — run once on mount.
+    // Height measurement — run once on mount. Also locks the outer scroll
+    // container (overflow-y: hidden) so touch-scrolling cannot move the entire
+    // plugin panel — only TabContentsScroll scrolls independently.
     SP_REACT.useEffect(() => {
         if (!containerRef.current)
             return;
         const containerRect = containerRef.current.getBoundingClientRect();
+        let scrollEl = null;
         let el = containerRef.current.parentElement;
         while (el && el !== document.documentElement) {
             const style = window.getComputedStyle(el);
@@ -591,11 +594,18 @@ const TabsContainer = () => {
             if (oy === 'scroll' || oy === 'auto' || oy === 'overlay') {
                 const elRect = el.getBoundingClientRect();
                 setHeight(elRect.bottom - containerRect.top);
-                return;
+                scrollEl = el;
+                break;
             }
             el = el.parentElement;
         }
-        setHeight(window.innerHeight - containerRect.top);
+        if (!scrollEl) {
+            setHeight(window.innerHeight - containerRect.top);
+            return;
+        }
+        const prev = scrollEl.style.overflowY;
+        scrollEl.style.overflowY = 'hidden';
+        return () => { scrollEl.style.overflowY = prev; };
     }, []);
     // Inject CSS on mount to fix tab bar layout and prevent touch scroll jank.
     // Replaces the per-tab-switch querySelectorAll DOM patches.
