@@ -39,6 +39,8 @@ const rowBtnFirst: React.CSSProperties = {
   justifyContent: 'center',
   minWidth: '0',
   flex: 1,
+  borderRadius: '0',
+  padding: '0 8px',
 };
 
 const rowBtn: React.CSSProperties = {
@@ -49,9 +51,11 @@ const rowBtn: React.CSSProperties = {
   justifyContent: 'center',
   minWidth: '0',
   flex: 1,
+  borderRadius: '0',
+  padding: '0 8px',
 };
 
-// Wraps a SliderField in a 12px-padded container and removes Decky's
+// Applies padding to Decky item elements (buttons, toggles) and removes
 // hardcoded min-width (270px) by finding the offending element at mount.
 const applyInnerPadding = (el: HTMLElement) => {
   el.style.paddingLeft = '16px';
@@ -74,8 +78,8 @@ const PaddedSlider = (props: SliderFieldProps) => {
     if (!ref.current) return;
     const firstChild = ref.current.firstElementChild as HTMLElement | null;
     if (firstChild) {
-      firstChild.style.paddingLeft = '10px';
-      firstChild.style.paddingRight = '10px';
+      firstChild.style.paddingLeft = '16px';
+      firstChild.style.paddingRight = '16px';
     }
     ref.current.querySelectorAll<HTMLElement>('*').forEach((el) => {
       if (parseFloat(window.getComputedStyle(el).minWidth) >= 270)
@@ -192,6 +196,7 @@ export const PlayerView = () => {
       )}
 
       {/* Prev / Play / Next */}
+      <div style={{ marginTop: '10px' }}>
       <Section noPull>
         {DialogButton ? (
           <>
@@ -223,6 +228,7 @@ export const PlayerView = () => {
           </>
         )}
       </Section>
+      </div>
 
       {/* Volume */}
       <Section>
@@ -246,7 +252,7 @@ export const PlayerView = () => {
         />
         <Focusable>
           <DialogButton
-            style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
+            style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', borderRadius: '0' }}
             onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
           >
             {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
