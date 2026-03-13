@@ -330,11 +330,13 @@ const PlayerProvider = ({ children }) => {
     SP_REACT.useEffect(() => {
         if (!state.connected)
             return;
+        let cancelled = false;
         void getSongInfo().then((info) => {
-            if (info)
+            if (!cancelled && info)
                 dispatch({ type: 'UPDATE', payload: { song: info } });
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- dispatch is stable; intentionally omit to avoid extra fetches
     }, [state.song?.videoId, state.connected]);
     return SP_JSX.jsx(PlayerContext.Provider, { value: state, children: children });
 };
