@@ -96,15 +96,23 @@ const PluginContent = () => {
   return <TabsContainer />;
 };
 
-const Content = () => (
-  <PlayerProvider>
-    <PluginContent />
-  </PlayerProvider>
-);
+const Content = () => {
+  useEffect(() => {
+    const titleEl = document.querySelector(`.${staticClasses.Title}`);
+    if (titleEl?.parentElement) {
+      titleEl.parentElement.style.gap = '0';
+    }
+  }, []);
+  return (
+    <PlayerProvider>
+      <PluginContent />
+    </PlayerProvider>
+  );
+};
 
 export default definePlugin(() => ({
   name: 'YouTube Music',
-  titleView: <div className={staticClasses.Title}>YouTube Music</div>,
+  titleView: <div className={staticClasses.Title} style={{ paddingTop: '0', boxShadow: 'none' }}>YouTube Music</div>,
   content: <Content />,
   icon: <FaMusic />,
   onDismount() {},
