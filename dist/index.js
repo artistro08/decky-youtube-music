@@ -555,12 +555,17 @@ const QueueView = () => {
                                 textAlign: 'left',
                                 height: 'auto',
                                 minHeight: '44px',
-                                padding: '10px 19px',
+                                padding: '0',
                                 display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
+                                flexDirection: 'row',
+                                alignItems: 'stretch',
                                 borderRadius: '0',
-                            }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsxs("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }, children: [isSelected && SP_JSX.jsx(IoPlay, { size: 11, style: { marginRight: '6px', flexShrink: 0 } }), SP_JSX.jsx("span", { style: { overflow: 'hidden', whiteSpace: 'nowrap', flex: 1, minWidth: 0, maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }, children: title })] }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }, children: artist }))] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
+                                overflow: 'hidden',
+                            }, onClick: () => { void handleJump(index); }, children: [SP_JSX.jsxs("div", { style: { width: '44px', flexShrink: 0, position: 'relative', background: 'rgba(255,255,255,0.05)' }, children: [r?.thumbnail?.thumbnails?.[0]?.url ? (SP_JSX.jsx("img", { src: r.thumbnail.thumbnails[0].url, alt: "", style: { width: '44px', height: '44px', objectFit: 'cover', display: 'block' } })) : (SP_JSX.jsx("div", { style: { width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gpSystemLighterGrey)' }, children: SP_JSX.jsx(FaMusic, { size: 18 }) })), isSelected && (SP_JSX.jsx("div", { style: {
+                                                position: 'absolute', inset: 0,
+                                                background: 'rgba(0,0,0,0.5)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            }, children: SP_JSX.jsx(IoPlay, { size: 16, color: "white" }) }))] }), SP_JSX.jsxs("div", { style: { flex: 1, minWidth: 0, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }, children: [SP_JSX.jsx("div", { style: { fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }, children: SP_JSX.jsx("span", { style: { overflow: 'hidden', whiteSpace: 'nowrap', flex: 1, minWidth: 0, maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }, children: title }) }), artist && (SP_JSX.jsx("div", { style: { fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px', overflow: 'hidden', whiteSpace: 'nowrap', maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }, children: artist }))] })] }), SP_JSX.jsx(DFL.DialogButton, { className: isSelected ? 'yt-queue-active' : undefined, onClick: () => { void handleRemove(index); }, style: {
                                 width: '36px',
                                 minWidth: '0',
                                 padding: '0',

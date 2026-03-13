@@ -1,5 +1,6 @@
 import { DialogButton, Field, Focusable } from '@decky/ui';
 import { useEffect, useState } from 'react';
+import { FaMusic } from 'react-icons/fa';
 import { IoPlay } from 'react-icons/io5';
 import { getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
@@ -81,23 +82,50 @@ export const QueueView = () => {
                   textAlign: 'left',
                   height: 'auto',
                   minHeight: '44px',
-                  padding: '10px 19px',
+                  padding: '0',
                   display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
+                  flexDirection: 'row',
+                  alignItems: 'stretch',
                   borderRadius: '0',
+                  overflow: 'hidden',
                 }}
                 onClick={() => { void handleJump(index); }}
               >
-                <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }}>
-                  {isSelected && <IoPlay size={11} style={{ marginRight: '6px', flexShrink: 0 }} />}
-                  <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', flex: 1, minWidth: 0, maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }}>{title}</span>
+                {/* Thumbnail */}
+                <div style={{ width: '44px', flexShrink: 0, position: 'relative', background: 'rgba(255,255,255,0.05)' }}>
+                  {r?.thumbnail?.thumbnails?.[0]?.url ? (
+                    <img
+                      src={r.thumbnail.thumbnails[0].url}
+                      alt=""
+                      style={{ width: '44px', height: '44px', objectFit: 'cover', display: 'block' }}
+                    />
+                  ) : (
+                    <div style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gpSystemLighterGrey)' }}>
+                      <FaMusic size={18} />
+                    </div>
+                  )}
+                  {isSelected && (
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'rgba(0,0,0,0.5)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <IoPlay size={16} color="white" />
+                    </div>
+                  )}
                 </div>
-                {artist && (
-                  <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px' }}>
-                    {artist}
+
+                {/* Text */}
+                <div style={{ flex: 1, minWidth: 0, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontWeight: isSelected ? 'bold' : 'normal', fontSize: '13px', display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }}>
+                    <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', flex: 1, minWidth: 0, maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }}>{title}</span>
                   </div>
-                )}
+                  {artist && (
+                    <div style={{ fontSize: '11px', color: 'var(--gpSystemLighterGrey)', marginTop: '2px', overflow: 'hidden', whiteSpace: 'nowrap', maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent 100%)' }}>
+                      {artist}
+                    </div>
+                  )}
+                </div>
               </DialogButton>
               <DialogButton
                 className={isSelected ? 'yt-queue-active' : undefined}
