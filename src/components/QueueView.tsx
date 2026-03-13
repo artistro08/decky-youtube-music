@@ -61,7 +61,7 @@ export const QueueView = () => {
     <Section>
       <Focusable>
         <DialogButton
-          style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px' }}
+          style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', borderRadius: '0' }}
           onClick={() => { void handleClear(); }}
         >
           <FaTrash /> Clear Queue
@@ -78,7 +78,7 @@ export const QueueView = () => {
           return (
             <Focusable
               key={index}
-              style={{ display: 'flex', alignItems: 'center', marginTop: '2px', marginBottom: '2px', paddingLeft: '16px', paddingRight: '16px', paddingTop: '4px', paddingBottom: '4px' }}
+              style={{ display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px', paddingLeft: '16px', paddingRight: '16px' }}
               flow-children="horizontal"
             >
               <DialogButton
@@ -86,11 +86,12 @@ export const QueueView = () => {
                   flex: 1,
                   textAlign: 'left',
                   height: 'auto',
-                  minHeight: '40px',
-                  padding: '4px 8px',
+                  minHeight: '44px',
+                  padding: '4px 16px',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
+                  borderRadius: '0',
                 }}
                 onClick={() => { void handleJump(index); }}
               >
@@ -104,15 +105,16 @@ export const QueueView = () => {
               <DialogButton
                 onClick={() => { void handleRemove(index); }}
                 style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '36px',
                   minWidth: '0',
                   padding: '0',
-                  marginLeft: '4px',
+                  marginLeft: '0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  borderRadius: '0',
+                  borderLeft: '1px solid rgba(255,255,255,0.15)',
                 }}
               >
                 ✕
