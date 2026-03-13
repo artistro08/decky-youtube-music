@@ -39,7 +39,6 @@ const rowBtnFirst: React.CSSProperties = {
   justifyContent: 'center',
   minWidth: '0',
   flex: 1,
-  borderRadius: '0',
   padding: '0 8px',
 };
 
@@ -51,7 +50,6 @@ const rowBtn: React.CSSProperties = {
   justifyContent: 'center',
   minWidth: '0',
   flex: 1,
-  borderRadius: '0',
   padding: '0 8px',
 };
 
@@ -252,7 +250,7 @@ export const PlayerView = () => {
         />
         <Focusable>
           <DialogButton
-            style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', borderRadius: '0' }}
+            style={{ height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }}
             onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
           >
             {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}

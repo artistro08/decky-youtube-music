@@ -61,7 +61,7 @@ export const QueueView = () => {
     <Section>
       <Focusable>
         <DialogButton
-          style={{ height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '16px', borderRadius: '0' }}
+          style={{ height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '13px', borderRadius: '0' }}
           onClick={() => { void handleClear(); }}
         >
           <FaTrash /> Clear Queue
@@ -78,7 +78,7 @@ export const QueueView = () => {
           return (
             <Focusable
               key={index}
-              style={{ display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px', paddingLeft: '16px', paddingRight: '16px' }}
+              style={{ display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }}
               flow-children="horizontal"
             >
               <DialogButton
