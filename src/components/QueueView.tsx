@@ -1,7 +1,7 @@
 import { DialogButton, Field, Focusable } from '@decky/ui';
 import { useEffect, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
-import { IoPlay } from 'react-icons/io5';
+import { IoVolumeMedium } from 'react-icons/io5';
 import { getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
@@ -110,7 +110,7 @@ export const QueueView = () => {
                       background: 'rgba(0,0,0,0.5)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <IoPlay size={16} color="white" />
+                      <IoVolumeMedium size={20} color="white" />
                     </div>
                   )}
                 </div>
