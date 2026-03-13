@@ -228,22 +228,15 @@ export const PlayerView = () => {
 
       {/* Volume */}
       <Section>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, paddingLeft: '12px' }}>
-            <FaVolumeUp size={14} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <PaddedSlider
-              label=""
-              value={displayVolume}
-              min={0}
-              max={100}
-              step={1}
-              onChange={handleVolumeChange}
-              showValue={false}
-            />
-          </div>
-        </div>
+        <PaddedSlider
+          icon={<FaVolumeUp size={14} />}
+          value={displayVolume}
+          min={0}
+          max={100}
+          step={1}
+          onChange={handleVolumeChange}
+          showValue={false}
+        />
       </Section>
 
       {/* Playback options */}
