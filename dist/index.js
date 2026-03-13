@@ -81,6 +81,8 @@ function IconBase(props) {
 // THIS FILE IS AUTO GENERATED
 function FaVolumeUp (props) {
   return GenIcon({"attr":{"viewBox":"0 0 576 512"},"child":[{"tag":"path","attr":{"d":"M215.03 71.05L126.06 160H24c-13.26 0-24 10.74-24 24v144c0 13.25 10.74 24 24 24h102.06l88.97 88.95c15.03 15.03 40.97 4.47 40.97-16.97V88.02c0-21.46-25.96-31.98-40.97-16.97zm233.32-51.08c-11.17-7.33-26.18-4.24-33.51 6.95-7.34 11.17-4.22 26.18 6.95 33.51 66.27 43.49 105.82 116.6 105.82 195.58 0 78.98-39.55 152.09-105.82 195.58-11.17 7.32-14.29 22.34-6.95 33.5 7.04 10.71 21.93 14.56 33.51 6.95C528.27 439.58 576 351.33 576 256S528.27 72.43 448.35 19.97zM480 256c0-63.53-32.06-121.94-85.77-156.24-11.19-7.14-26.03-3.82-33.12 7.46s-3.78 26.21 7.41 33.36C408.27 165.97 432 209.11 432 256s-23.73 90.03-63.48 115.42c-11.19 7.14-14.5 22.07-7.41 33.36 6.51 10.36 21.12 15.14 33.12 7.46C447.94 377.94 480 319.54 480 256zm-141.77-76.87c-11.58-6.33-26.19-2.16-32.61 9.45-6.39 11.61-2.16 26.2 9.45 32.61C327.98 228.28 336 241.63 336 256c0 14.38-8.02 27.72-20.92 34.81-11.61 6.41-15.84 21-9.45 32.61 6.43 11.66 21.05 15.8 32.61 9.45 28.23-15.55 45.77-45 45.77-76.88s-17.54-61.32-45.78-76.86z"},"child":[]}]})(props);
+}function FaTrash (props) {
+  return GenIcon({"attr":{"viewBox":"0 0 448 512"},"child":[{"tag":"path","attr":{"d":"M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"},"child":[]}]})(props);
 }function FaThumbsUp (props) {
   return GenIcon({"attr":{"viewBox":"0 0 512 512"},"child":[{"tag":"path","attr":{"d":"M104 224H24c-13.255 0-24 10.745-24 24v240c0 13.255 10.745 24 24 24h80c13.255 0 24-10.745 24-24V248c0-13.255-10.745-24-24-24zM64 472c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zM384 81.452c0 42.416-25.97 66.208-33.277 94.548h101.723c33.397 0 59.397 27.746 59.553 58.098.084 17.938-7.546 37.249-19.439 49.197l-.11.11c9.836 23.337 8.237 56.037-9.308 79.469 8.681 25.895-.069 57.704-16.382 74.757 4.298 17.598 2.244 32.575-6.148 44.632C440.202 511.587 389.616 512 346.839 512l-2.845-.001c-48.287-.017-87.806-17.598-119.56-31.725-15.957-7.099-36.821-15.887-52.651-16.178-6.54-.12-11.783-5.457-11.783-11.998v-213.77c0-3.2 1.282-6.271 3.558-8.521 39.614-39.144 56.648-80.587 89.117-113.111 14.804-14.832 20.188-37.236 25.393-58.902C282.515 39.293 291.817 0 312 0c24 0 72 8 72 81.452z"},"child":[]}]})(props);
 }function FaThumbsDown (props) {
@@ -530,9 +532,9 @@ const QueueView = () => {
         return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '16px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Loading queue..." }) }));
     }
     if (queue.length === 0) {
-        return (SP_JSX.jsx(Section, { title: "Queue", children: SP_JSX.jsx("div", { style: { padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
+        return (SP_JSX.jsx(Section, { children: SP_JSX.jsx("div", { style: { padding: '8px 12px', color: 'var(--gpSystemLighterGrey)', fontSize: '12px' }, children: "Queue is empty" }) }));
     }
-    return (SP_JSX.jsxs(Section, { title: "Queue", children: [SP_JSX.jsx(PaddedButton, { onClick: () => { void handleClear(); }, children: "Clear Queue" }), queue.map((item, index) => {
+    return (SP_JSX.jsxs(Section, { children: [SP_JSX.jsxs(PaddedButton, { onClick: () => { void handleClear(); }, children: [SP_JSX.jsx(FaTrash, {}), " Clear Queue"] }), queue.map((item, index) => {
                 const r = getRenderer(item);
                 const title = r?.title?.runs?.[0]?.text ?? 'Unknown';
                 const artist = r?.shortBylineText?.runs?.[0]?.text ?? '';
