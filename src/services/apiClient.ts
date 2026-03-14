@@ -3,6 +3,7 @@ import type { QueueResponse, SearchResultItem, SongInfo } from '../types';
 import { notifyAuthRequired } from './authEvents';
 
 const BASE_URL = 'http://127.0.0.1:26538/api/v1';
+const AUTH_URL = 'http://127.0.0.1:26538';
 const TOKEN_KEY = 'ytmusic_api_token';
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
@@ -126,7 +127,7 @@ export const requestAuth = async (id: string): Promise<string> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60_000);
   try {
-    const res = await fetch(`${BASE_URL}/auth/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${AUTH_URL}/auth/${encodeURIComponent(id)}`, {
       method: 'POST',
       signal: controller.signal,
     });
