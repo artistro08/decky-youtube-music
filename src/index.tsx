@@ -1,7 +1,6 @@
+import { ButtonItem, Tabs, staticClasses } from '@decky/ui';
+import { definePlugin } from '@decky/api';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { ButtonItem, DialogButton, Focusable, Navigation, Tabs, staticClasses } from '@decky/ui';
-import { definePlugin, routerHook } from '@decky/api';
-import { BsGearFill } from 'react-icons/bs';
 import { FaMusic } from 'react-icons/fa';
 
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
@@ -10,7 +9,6 @@ import { AuthTokenView } from './components/AuthTokenView';
 import { PlayerView } from './components/PlayerView';
 import { QueueView } from './components/QueueView';
 import { Section } from './components/Section';
-import { SettingsView } from './components/SettingsView';
 
 const TabsContainer = memo(() => {
   const [activeTab, setActiveTab] = useState<string>('player');
@@ -142,39 +140,10 @@ const Content = () => {
   );
 };
 
-export default definePlugin(() => {
-  routerHook.addRoute('/youtube-music/settings', SettingsView);
-
-  return {
-    name: 'YouTube Music',
-    titleView: (
-      <Focusable
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          width: '100%',
-          padding: '0',
-          boxShadow: 'none',
-        }}
-        className={staticClasses.Title}
-      >
-        <div>YouTube Music</div>
-        <DialogButton
-          style={{ height: '28px', width: '40px', minWidth: 0, padding: '10px 12px' }}
-          onClick={() => {
-            Navigation.Navigate('/youtube-music/settings');
-            Navigation.CloseSideMenus();
-          }}
-        >
-          <BsGearFill style={{ marginTop: '-4px', display: 'block' }} />
-        </DialogButton>
-      </Focusable>
-    ),
-    content: <Content />,
-    icon: <FaMusic />,
-    onDismount() {
-      routerHook.removeRoute('/youtube-music/settings');
-    },
-  };
-});
+export default definePlugin(() => ({
+  name: 'YouTube Music',
+  titleView: <div className={staticClasses.Title} style={{ paddingTop: '0', boxShadow: 'none' }}>YouTube Music</div>,
+  content: <Content />,
+  icon: <FaMusic />,
+  onDismount() {},
+}));

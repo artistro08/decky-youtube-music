@@ -3,7 +3,6 @@ import type { QueueResponse, SearchResultItem, SongInfo } from '../types';
 import { notifyAuthRequired } from './authEvents';
 
 const BASE_URL = 'http://127.0.0.1:26538/api/v1';
-const AUTH_URL = 'http://127.0.0.1:26538';
 const TOKEN_KEY = 'ytmusic_api_token';
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
@@ -120,22 +119,5 @@ export const search = async (query: string): Promise<SearchResultItem[]> => {
   } catch {
     toaster.toast({ title: 'Search error', body: 'Could not reach YouTube Music' });
     return [];
-  }
-};
-
-export const requestAuth = async (id: string): Promise<string> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60_000);
-  try {
-    const res = await fetch(`${AUTH_URL}/auth/${encodeURIComponent(id)}`, {
-      method: 'POST',
-      signal: controller.signal,
-    });
-    if (res.status === 403) throw new Error('denied');
-    if (!res.ok) throw new Error(`auth failed: ${res.status}`);
-    const data = await res.json() as { accessToken: string };
-    return data.accessToken;
-  } finally {
-    clearTimeout(timeout);
   }
 };
