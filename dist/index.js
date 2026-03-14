@@ -499,6 +499,36 @@ const PaddedToggle = (props) => {
     }, []);
     return SP_JSX.jsx("div", { ref: ref, children: SP_JSX.jsx(DFL.ToggleField, { ...props }) });
 };
+const RepeatButton = ({ repeat }) => {
+    const [focused, setFocused] = SP_REACT.useState(false);
+    const styleRef = SP_REACT.useRef(null);
+    SP_REACT.useEffect(() => {
+        const el = document.createElement('style');
+        el.textContent = `
+      @keyframes ytm-repeat-focus {
+        0%   { background: #5a6270; }
+        100% { background: #32373D; }
+      }
+    `;
+        document.head.appendChild(el);
+        styleRef.current = el;
+        return () => el.remove();
+    }, []);
+    return (SP_JSX.jsx(DFL.Focusable, { onFocus: () => setFocused(true), onBlur: () => setFocused(false), children: SP_JSX.jsxs(DFL.DialogButton, { style: {
+                height: '42px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: '6px',
+                paddingLeft: '19px',
+                paddingRight: '19px',
+                borderRadius: '0',
+                color: 'white',
+                background: focused ? '#32373D' : '#0d141c',
+                animation: focused ? 'ytm-repeat-focus 0.3s ease' : 'none',
+                transition: 'background 0.2s ease',
+            }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) }));
+};
 const PlayerView = () => {
     const { song, isPlaying, shuffle: isShuffled, repeat } = usePlayer();
     const albumArt = song?.albumArt;
@@ -509,7 +539,7 @@ const PlayerView = () => {
                                 background: 'rgba(255,255,255,0.08)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 color: 'var(--gpSystemLighterGrey)',
-                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: transBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(IoPlaySkipBack, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(IoPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(IoPlaySkipForward, {}) })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(IoPlaySkipBack, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(IoPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(IoPlaySkipForward, {}), " Next"] })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(VolumeSlider, {}) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 14 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(DFL.Focusable, { children: SP_JSX.jsxs(DFL.DialogButton, { style: { height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '19px', paddingRight: '19px', borderRadius: '0' }, onClick: () => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }, children: [REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE, "Repeat: ", REPEAT_LABELS[repeat] ?? 'Off'] }) })] })] }));
+                            }, children: SP_JSX.jsx(FaMusic, { size: 36 }) })), SP_JSX.jsxs("div", { style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }, children: [SP_JSX.jsx("div", { style: { fontWeight: 'bold', fontSize: '15px', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: title }), artist && (SP_JSX.jsx("div", { style: { fontSize: '12px', color: 'var(--gpSystemLighterGrey)', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }, children: artist }))] })] }) }), SP_JSX.jsx("div", { style: { marginTop: '10px', marginBottom: '10px', paddingLeft: '5px', paddingRight: '5px' }, children: SP_JSX.jsx(Section, { noPull: true, children: DFL.DialogButton ? (SP_JSX.jsxs(DFL.Focusable, { style: { display: 'flex', marginTop: '4px', marginBottom: '4px' }, "flow-children": "horizontal", children: [SP_JSX.jsx(DFL.DialogButton, { style: transBtnFirst, onClick: () => { void previous(); }, children: SP_JSX.jsx(IoPlaySkipBack, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnMid, onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsx(FaPause, {}) : SP_JSX.jsx(IoPlay, {}) }), SP_JSX.jsx(DFL.DialogButton, { style: transBtnLast, onClick: () => { void next(); }, children: SP_JSX.jsx(IoPlaySkipForward, {}) })] })) : (SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void previous(); }, children: [SP_JSX.jsx(IoPlaySkipBack, {}), " Previous"] }), SP_JSX.jsx(DFL.ButtonItem, { onClick: () => { void togglePlay(); }, children: isPlaying ? SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(FaPause, {}), " Pause"] }) : SP_JSX.jsxs(SP_JSX.Fragment, { children: [SP_JSX.jsx(IoPlay, {}), " Play"] }) }), SP_JSX.jsxs(DFL.ButtonItem, { onClick: () => { void next(); }, children: [SP_JSX.jsx(IoPlaySkipForward, {}), " Next"] })] })) }) }), SP_JSX.jsx(Section, { children: SP_JSX.jsx(VolumeSlider, {}) }), SP_JSX.jsxs(Section, { children: [SP_JSX.jsx(PaddedToggle, { label: SP_JSX.jsxs("span", { style: { display: 'flex', alignItems: 'center', gap: '6px' }, children: [SP_JSX.jsx(FaRandom, { size: 14 }), " Shuffle"] }), checked: isShuffled, onChange: () => { void shuffle(); } }), SP_JSX.jsx(RepeatButton, { repeat: repeat })] })] }));
 };
 
 const getRenderer = (item) => item.playlistPanelVideoRenderer ??

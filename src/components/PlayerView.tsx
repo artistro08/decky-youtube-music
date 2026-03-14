@@ -1,5 +1,5 @@
 import { ButtonItem, DialogButton, Focusable, ToggleField } from '@decky/ui';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaPause, FaRandom, FaMusic } from 'react-icons/fa';
 import { IoPlay, IoPlaySkipBack, IoPlaySkipForward } from 'react-icons/io5';
 import { MdRepeat, MdRepeatOne } from 'react-icons/md';
@@ -55,6 +55,52 @@ const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
     if (first) applyInnerPadding(first);
   }, []);
   return <div ref={ref}><ToggleField {...props} /></div>;
+};
+
+const RepeatButton = ({ repeat }: { repeat: string }) => {
+  const [focused, setFocused] = useState(false);
+  const styleRef = useRef<HTMLStyleElement | null>(null);
+
+  useEffect(() => {
+    const el = document.createElement('style');
+    el.textContent = `
+      @keyframes ytm-repeat-focus {
+        0%   { background: #5a6270; }
+        100% { background: #32373D; }
+      }
+    `;
+    document.head.appendChild(el);
+    styleRef.current = el;
+    return () => el.remove();
+  }, []);
+
+  return (
+    <Focusable
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+    >
+      <DialogButton
+        style={{
+          height: '42px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: '6px',
+          paddingLeft: '19px',
+          paddingRight: '19px',
+          borderRadius: '0',
+          color: 'white',
+          background: focused ? '#32373D' : '#0d141c',
+          animation: focused ? 'ytm-repeat-focus 0.3s ease' : 'none',
+          transition: 'background 0.2s ease',
+        }}
+        onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
+      >
+        {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
+        Repeat: {REPEAT_LABELS[repeat] ?? 'Off'}
+      </DialogButton>
+    </Focusable>
+  );
 };
 
 export const PlayerView = () => {
@@ -136,15 +182,7 @@ export const PlayerView = () => {
           checked={isShuffled}
           onChange={() => { void shuffle(); }}
         />
-        <Focusable>
-          <DialogButton
-            style={{ height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px', paddingLeft: '19px', paddingRight: '19px', borderRadius: '0' }}
-            onClick={() => { void switchRepeat(REPEAT_NEXT[repeat] ?? 1); }}
-          >
-            {REPEAT_ICONS[repeat] ?? REPEAT_ICONS.NONE}
-            Repeat: {REPEAT_LABELS[repeat] ?? 'Off'}
-          </DialogButton>
-        </Focusable>
+        <RepeatButton repeat={repeat} />
       </Section>
     </>
   );

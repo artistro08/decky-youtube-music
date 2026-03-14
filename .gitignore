@@ -55,3 +55,12 @@ out/*
 cli/
 cli/*
 cli/decky
+
+# Claude / Superpowers
+.claude/
+.superpowers/
+docs/
+design/
+
+# Build artifact
+youtube-music.zip
