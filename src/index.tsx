@@ -1,6 +1,5 @@
-import { ButtonItem, DialogButton, Focusable, Tabs, staticClasses } from '@decky/ui';
+import { ButtonItem, DialogButton, Focusable, Navigation, Tabs, staticClasses } from '@decky/ui';
 import { definePlugin, routerHook } from '@decky/api';
-import { Navigation } from '@decky/ui';
 import { BsGearFill } from 'react-icons/bs';
 import { SettingsView } from './components/SettingsView';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
