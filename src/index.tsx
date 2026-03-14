@@ -1,8 +1,7 @@
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { ButtonItem, DialogButton, Focusable, Navigation, Tabs, staticClasses } from '@decky/ui';
 import { definePlugin, routerHook } from '@decky/api';
 import { BsGearFill } from 'react-icons/bs';
-import { SettingsView } from './components/SettingsView';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
 
 import { PlayerProvider, usePlayer } from './context/PlayerContext';
@@ -11,6 +10,7 @@ import { AuthTokenView } from './components/AuthTokenView';
 import { PlayerView } from './components/PlayerView';
 import { QueueView } from './components/QueueView';
 import { Section } from './components/Section';
+import { SettingsView } from './components/SettingsView';
 
 const TabsContainer = memo(() => {
   const [activeTab, setActiveTab] = useState<string>('player');
