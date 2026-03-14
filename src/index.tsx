@@ -1,5 +1,8 @@
-import { ButtonItem, Tabs, staticClasses } from '@decky/ui';
-import { definePlugin } from '@decky/api';
+import { ButtonItem, DialogButton, Focusable, Tabs, staticClasses } from '@decky/ui';
+import { definePlugin, routerHook } from '@decky/api';
+import { Navigation } from '@decky/ui';
+import { BsGearFill } from 'react-icons/bs';
+import { SettingsView } from './components/SettingsView';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
 
@@ -140,10 +143,39 @@ const Content = () => {
   );
 };
 
-export default definePlugin(() => ({
-  name: 'YouTube Music',
-  titleView: <div className={staticClasses.Title} style={{ paddingTop: '0', boxShadow: 'none' }}>YouTube Music</div>,
-  content: <Content />,
-  icon: <FaMusic />,
-  onDismount() {},
-}));
+export default definePlugin(() => {
+  routerHook.addRoute('/youtube-music/settings', SettingsView);
+
+  return {
+    name: 'YouTube Music',
+    titleView: (
+      <Focusable
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: '0',
+          boxShadow: 'none',
+        }}
+        className={staticClasses.Title}
+      >
+        <div>YouTube Music</div>
+        <DialogButton
+          style={{ height: '28px', width: '40px', minWidth: 0, padding: '10px 12px' }}
+          onClick={() => {
+            Navigation.Navigate('/youtube-music/settings');
+            Navigation.CloseSideMenus();
+          }}
+        >
+          <BsGearFill style={{ marginTop: '-4px', display: 'block' }} />
+        </DialogButton>
+      </Focusable>
+    ),
+    content: <Content />,
+    icon: <FaMusic />,
+    onDismount() {
+      routerHook.removeRoute('/youtube-music/settings');
+    },
+  };
+});
