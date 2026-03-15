@@ -5,6 +5,7 @@ import { IoVolumeMedium } from 'react-icons/io5';
 import { getQueue, removeFromQueue, setQueueIndex } from '../services/apiClient';
 import type { QueueItem, QueueResponse } from '../types';
 import { Section } from './Section';
+import { usePlayer } from '../context/PlayerContext';
 
 const getRenderer = (item: QueueItem) =>
   item.playlistPanelVideoRenderer ??
@@ -13,6 +14,7 @@ const getRenderer = (item: QueueItem) =>
 export const QueueView = () => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { connected } = usePlayer();
 
   const loadQueue = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -21,7 +23,8 @@ export const QueueView = () => {
     if (!silent) setLoading(false);
   };
 
-  useEffect(() => { void loadQueue(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (connected) void loadQueue(); }, [connected]);
 
   useEffect(() => {
     const el = document.createElement('style');
@@ -71,7 +74,7 @@ export const QueueView = () => {
         if (DialogButton) {
           return (
             <Focusable
-              key={index}
+              key={r?.videoId ?? `q-${index}`}
               style={{ display: 'flex', alignItems: 'stretch', marginTop: '2px', marginBottom: '2px' }}
               flow-children="horizontal"
             >
@@ -152,7 +155,7 @@ export const QueueView = () => {
         // Fallback when DialogButton unavailable
         return (
           <Field
-            key={index}
+            key={r?.videoId ?? `q-${index}`}
             label={<span style={{ fontWeight: isSelected ? 'bold' : 'normal' }}>{title}</span>}
             description={artist || undefined}
             onActivate={() => { void handleJump(index); }}

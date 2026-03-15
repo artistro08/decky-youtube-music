@@ -95,6 +95,7 @@ const addAuthListener = (fn) => {
     return () => { authListeners = authListeners.filter((l) => l !== fn); };
 };
 const notifyAuthRequired = () => authListeners.forEach((l) => l());
+const clearAuthListeners = () => { authListeners = []; };
 
 const BASE_URL = 'http://127.0.0.1:26538/api/v1';
 const TOKEN_KEY = 'ytmusic_api_token';
@@ -122,12 +123,12 @@ const post = async (path, body) => {
         return true;
     }
     catch {
-        return true; // network error, not auth error
+        return false;
     }
 };
-const get = async (path) => {
+const get = async (path, signal) => {
     try {
-        const res = await fetch(`${BASE_URL}${path}`, { headers: headers() });
+        const res = await fetch(`${BASE_URL}${path}`, { headers: headers(), signal });
         if (res.status === 401) {
             notifyAuthRequired();
             return null;
@@ -142,22 +143,32 @@ const get = async (path) => {
 };
 const del = async (path) => {
     try {
-        await fetch(`${BASE_URL}${path}`, { method: 'DELETE', headers: headers() });
+        const res = await fetch(`${BASE_URL}${path}`, { method: 'DELETE', headers: headers() });
+        if (res.status === 401) {
+            notifyAuthRequired();
+            return false;
+        }
+        return true;
     }
     catch {
-        // silent
+        return false;
     }
 };
 const patch = async (path, body) => {
     try {
-        await fetch(`${BASE_URL}${path}`, {
+        const res = await fetch(`${BASE_URL}${path}`, {
             method: 'PATCH',
             headers: headers(),
             body: JSON.stringify(body),
         });
+        if (res.status === 401) {
+            notifyAuthRequired();
+            return false;
+        }
+        return true;
     }
     catch {
-        // silent
+        return false;
     }
 };
 const togglePlay = () => post('/toggle-play');
@@ -167,8 +178,8 @@ const setVolume = (volume) => post('/volume', { volume });
 const shuffle = () => post('/shuffle');
 const switchRepeat = (iteration) => post('/switch-repeat', { iteration });
 // Song & state
-const getSongInfo = async () => {
-    const info = await get('/song');
+const getSongInfo = async (signal) => {
+    const info = await get('/song', signal);
     if (!info)
         return null;
     // Companion API uses imageSrc; normalise to albumArt for internal use.
@@ -222,6 +233,10 @@ const connect = () => {
     socket.onclose = () => {
         notify({ connected: false });
         if (!destroyed) {
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
             reconnectTimer = setTimeout(connect, RECONNECT_DELAY_MS);
         }
     };
@@ -231,12 +246,20 @@ const connect = () => {
 };
 const disconnect = () => {
     destroyed = true;
-    if (reconnectTimer)
+    if (reconnectTimer) {
         clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
     socket?.close();
     socket = null;
+    listeners = [];
+    clearAuthListeners();
 };
 const resetAndConnect = () => {
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
     destroyed = false;
     connect();
 };
@@ -344,13 +367,13 @@ const PlayerProvider = ({ children }) => {
     SP_REACT.useEffect(() => {
         if (!state.connected)
             return;
-        let cancelled = false;
-        void getSongInfo().then((info) => {
-            if (!cancelled && info)
+        const controller = new AbortController();
+        void getSongInfo(controller.signal).then((info) => {
+            if (info)
                 dispatch({ type: 'SUPPLEMENT_SONG', payload: info });
-        });
-        return () => { cancelled = true; };
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- dispatch is stable; intentionally omit to avoid extra fetches
+        }).catch(() => { });
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.song?.videoId, state.connected]);
     return SP_JSX.jsx(PlayerContext.Provider, { value: state, children: children });
 };
@@ -501,7 +524,6 @@ const PaddedToggle = (props) => {
 };
 const RepeatButton = ({ repeat }) => {
     const [focused, setFocused] = SP_REACT.useState(false);
-    const styleRef = SP_REACT.useRef(null);
     SP_REACT.useEffect(() => {
         const el = document.createElement('style');
         el.textContent = `
@@ -511,7 +533,6 @@ const RepeatButton = ({ repeat }) => {
       }
     `;
         document.head.appendChild(el);
-        styleRef.current = el;
         return () => el.remove();
     }, []);
     return (SP_JSX.jsx(DFL.Focusable, { onFocus: () => setFocused(true), onBlur: () => setFocused(false), children: SP_JSX.jsxs(DFL.DialogButton, { style: {
@@ -547,6 +568,7 @@ const getRenderer = (item) => item.playlistPanelVideoRenderer ??
 const QueueView = () => {
     const [queue, setQueue] = SP_REACT.useState([]);
     const [loading, setLoading] = SP_REACT.useState(true);
+    const { connected } = usePlayer();
     const loadQueue = async (silent = false) => {
         if (!silent)
             setLoading(true);
@@ -555,7 +577,9 @@ const QueueView = () => {
         if (!silent)
             setLoading(false);
     };
-    SP_REACT.useEffect(() => { void loadQueue(); }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    SP_REACT.useEffect(() => { if (connected)
+        void loadQueue(); }, [connected]);
     SP_REACT.useEffect(() => {
         const el = document.createElement('style');
         el.textContent = `.yt-queue-active:not(:focus):not(:focus-within) { background: rgba(255,255,255,0) !important; }`;
@@ -608,10 +632,10 @@ const QueueView = () => {
                                 flexShrink: 0,
                                 borderRadius: '0',
                                 borderLeft: '1px solid rgba(255,255,255,0.15)',
-                            }, children: "\u2715" })] }, index));
+                            }, children: "\u2715" })] }, r?.videoId ?? `q-${index}`));
             }
             // Fallback when DialogButton unavailable
-            return (SP_JSX.jsx(DFL.Field, { label: SP_JSX.jsx("span", { style: { fontWeight: isSelected ? 'bold' : 'normal' }, children: title }), description: artist || undefined, onActivate: () => { void handleJump(index); }, onClick: () => { void handleJump(index); }, highlightOnFocus: true, focusable: true, bottomSeparator: "none" }, index));
+            return (SP_JSX.jsx(DFL.Field, { label: SP_JSX.jsx("span", { style: { fontWeight: isSelected ? 'bold' : 'normal' }, children: title }), description: artist || undefined, onActivate: () => { void handleJump(index); }, onClick: () => { void handleJump(index); }, highlightOnFocus: true, focusable: true, bottomSeparator: "none" }, r?.videoId ?? `q-${index}`));
         }) }));
 };
 
@@ -690,6 +714,7 @@ const TabsContainer = SP_REACT.memo(() => {
     ], []);
     return (SP_JSX.jsx("div", { id: "ytm-container", ref: containerRef, style: { height, overflow: 'hidden' }, children: SP_JSX.jsx(DFL.Tabs, { activeTab: activeTab, onShowTab: (tabID) => setActiveTab(tabID), tabs: tabItems }) }));
 });
+TabsContainer.displayName = 'TabsContainer';
 const PluginContent = () => {
     const { connected, authRequired } = usePlayer();
     const [activeTab, setActiveTab] = SP_REACT.useState('player');

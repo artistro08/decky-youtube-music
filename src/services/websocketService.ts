@@ -1,5 +1,6 @@
 import type { PlayerState, WSMessage, WSMessageType } from '../types';
 import { getToken } from './apiClient';
+import { clearAuthListeners } from './authEvents';
 
 const WS_URL = 'ws://127.0.0.1:26538/api/v1/ws';
 const RECONNECT_DELAY_MS = 5000;
@@ -49,6 +50,7 @@ export const connect = (): void => {
   socket.onclose = () => {
     notify({ connected: false });
     if (!destroyed) {
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
       reconnectTimer = setTimeout(connect, RECONNECT_DELAY_MS);
     }
   };
@@ -60,12 +62,15 @@ export const connect = (): void => {
 
 export const disconnect = (): void => {
   destroyed = true;
-  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
   socket?.close();
   socket = null;
+  listeners = [];
+  clearAuthListeners();
 };
 
 export const resetAndConnect = (): void => {
+  if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
   destroyed = false;
   connect();
 };

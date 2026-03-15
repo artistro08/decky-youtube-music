@@ -8,3 +8,5 @@ export const addAuthListener = (fn: AuthListener): (() => void) => {
 
 export const notifyAuthRequired = (): void =>
   authListeners.forEach((l) => l());
+
+export const clearAuthListeners = (): void => { authListeners = []; };

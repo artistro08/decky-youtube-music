@@ -97,6 +97,7 @@ const TabsContainer = memo(() => {
     </div>
   );
 });
+TabsContainer.displayName = 'TabsContainer';
 
 const PluginContent = () => {
   const { connected, authRequired } = usePlayer();

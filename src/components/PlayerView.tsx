@@ -59,7 +59,6 @@ const PaddedToggle = (props: React.ComponentProps<typeof ToggleField>) => {
 
 const RepeatButton = ({ repeat }: { repeat: string }) => {
   const [focused, setFocused] = useState(false);
-  const styleRef = useRef<HTMLStyleElement | null>(null);
 
   useEffect(() => {
     const el = document.createElement('style');
@@ -70,7 +69,6 @@ const RepeatButton = ({ repeat }: { repeat: string }) => {
       }
     `;
     document.head.appendChild(el);
-    styleRef.current = el;
     return () => el.remove();
   }, []);
 

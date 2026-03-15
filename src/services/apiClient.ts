@@ -30,13 +30,13 @@ const post = async (path: string, body?: object): Promise<boolean> => {
     }
     return true;
   } catch {
-    return true; // network error, not auth error
+    return false;
   }
 };
 
-const get = async <T>(path: string): Promise<T | null> => {
+const get = async <T>(path: string, signal?: AbortSignal): Promise<T | null> => {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, { headers: headers() });
+    const res = await fetch(`${BASE_URL}${path}`, { headers: headers(), signal });
     if (res.status === 401) {
       notifyAuthRequired();
       return null;
@@ -48,23 +48,27 @@ const get = async <T>(path: string): Promise<T | null> => {
   }
 };
 
-const del = async (path: string): Promise<void> => {
+const del = async (path: string): Promise<boolean> => {
   try {
-    await fetch(`${BASE_URL}${path}`, { method: 'DELETE', headers: headers() });
+    const res = await fetch(`${BASE_URL}${path}`, { method: 'DELETE', headers: headers() });
+    if (res.status === 401) { notifyAuthRequired(); return false; }
+    return true;
   } catch {
-    // silent
+    return false;
   }
 };
 
-const patch = async (path: string, body: object): Promise<void> => {
+const patch = async (path: string, body: object): Promise<boolean> => {
   try {
-    await fetch(`${BASE_URL}${path}`, {
+    const res = await fetch(`${BASE_URL}${path}`, {
       method: 'PATCH',
       headers: headers(),
       body: JSON.stringify(body),
     });
+    if (res.status === 401) { notifyAuthRequired(); return false; }
+    return true;
   } catch {
-    // silent
+    return false;
   }
 };
 
@@ -81,8 +85,8 @@ export const shuffle = () => post('/shuffle');
 export const switchRepeat = (iteration: number) => post('/switch-repeat', { iteration });
 
 // Song & state
-export const getSongInfo = async (): Promise<SongInfo | null> => {
-  const info = await get<SongInfo>('/song');
+export const getSongInfo = async (signal?: AbortSignal): Promise<SongInfo | null> => {
+  const info = await get<SongInfo>('/song', signal);
   if (!info) return null;
   // Companion API uses imageSrc; normalise to albumArt for internal use.
   if (!info.albumArt && info.imageSrc) info.albumArt = info.imageSrc;
