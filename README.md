@@ -2,6 +2,7 @@
 
 Control [YouTube Music](https://github.com/th-ch/youtube-music) from your Steam Deck sidebar using [Decky](https://decky.xyz/).
 
+> [!NOTE]
 > If you want standalone functionality, see [this plugin](https://github.com/artistro08/decky-youtube-music).
 
 ![Player View](screenshots/player.jpeg)
