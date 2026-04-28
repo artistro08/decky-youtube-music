@@ -4,6 +4,7 @@ Control [YouTube Music](https://github.com/th-ch/youtube-music) from your Steam 
 
 > [!NOTE]
 > If you want standalone functionality, see [this plugin](https://github.com/artistro08/decky-youtube-music-player).
+> If you want to control YouTube Music or YouTube exclusively from your phone, see [this plugin](https://github.com/artistro08/youtube-cast-receiver)
 
 ![Player View](screenshots/player.jpeg)
 ![Queue View](screenshots/queue.jpeg)
